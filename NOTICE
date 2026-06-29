@@ -1,0 +1,16 @@
+rnd_lab
+
+This project is a derivative fork of robot_lab:
+https://github.com/fan-ziqi/robot_lab
+
+The upstream project was originally authored by Ziqi Fan and is distributed
+under the Apache License 2.0.
+
+`rnd_lab`'s maintained scope is the non-4bar RND STEP humanoid reinforcement
+learning environment, including its robot asset integration, Isaac Lab task
+configuration, sim-to-real randomization, reward shaping, and training/play
+workflow changes.
+
+Other upstream robot environments may remain in the source tree for reference
+or compatibility, but they are not the maintained target of this fork unless
+explicitly documented otherwise.

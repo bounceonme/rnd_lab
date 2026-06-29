@@ -1,0 +1,96 @@
+# Omniverse
+**/*.dmp
+**/.thumbs
+
+# Python
+.DS_Store
+**/*.egg-info/
+**/__pycache__/
+**/.pytest_cache/
+**/*.pyc
+**/*.pb
+
+# IDE
+**/.idea/
+**/.vscode/
+# Don't ignore the top-level .vscode directory as it is
+# used to configure VS Code settings
+!.vscode
+.vscode/*.db*
+.vscode/*.db-shm
+.vscode/*.db-wal
+
+# Outputs
+**/runs/*
+**/logs/*
+**/recordings/*
+**/output/*
+**/outputs/*
+**/videos/*
+**/wandb/*
+**/.neptune/*
+train_log/*
+docker/artifacts/
+*.tmp
+*.npz
+*.bak
+*.log
+*.zip
+
+# Local agent/workspace state
+.codex
+.codex/
+.agents
+.agents/
+.github/workflows/pre-commit.yaml
+OHGYM Video/
+oh gym 지원.md
+
+# Outside the maintained public fork scope for now
+docs/imgs/
+source/robot_lab/data/Robots/booster/
+source/robot_lab/data/Robots/ddt/
+source/robot_lab/data/Robots/deeprobotics/
+source/robot_lab/data/Robots/fftai/
+source/robot_lab/data/Robots/magiclab/
+source/robot_lab/data/Robots/openloong/
+source/robot_lab/data/Robots/roboparty/
+source/robot_lab/data/Robots/robotera/
+source/robot_lab/data/Robots/unitree/
+source/robot_lab/data/Robots/zsibot/
+source/robot_lab/data/Robots/rnd/step_4bar/
+source/robot_lab/robot_lab/assets/booster.py
+source/robot_lab/robot_lab/assets/ddtrobot.py
+source/robot_lab/robot_lab/assets/deeprobotics.py
+source/robot_lab/robot_lab/assets/fftai.py
+source/robot_lab/robot_lab/assets/magiclab.py
+source/robot_lab/robot_lab/assets/openloong.py
+source/robot_lab/robot_lab/assets/roboparty.py
+source/robot_lab/robot_lab/assets/robotera.py
+source/robot_lab/robot_lab/assets/unitree.py
+source/robot_lab/robot_lab/assets/zsibot.py
+source/robot_lab/robot_lab/tasks/direct/
+source/robot_lab/robot_lab/tasks/manager_based/beyondmimic/
+source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/
+source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/wheeled/
+source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/others/
+source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/booster_t1/
+source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/fftai_gr1t1/
+source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/fftai_gr1t2/
+source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/magiclab_magicbot_gen1/
+source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/magiclab_magicbot_z1/
+source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/openloong_loong/
+source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/roboparty_atom01/
+source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/robotera_xbot/
+source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/unitree_g1/
+source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/unitree_h1/
+source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/rnd_step_4bar/
+
+# Isaac-Sim packman
+_isaac_sim*
+_repo
+_build
+.lastformat
+
+# LSP
+pyrightconfig.json
