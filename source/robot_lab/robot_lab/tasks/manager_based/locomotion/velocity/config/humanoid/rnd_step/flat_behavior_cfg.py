@@ -71,8 +71,18 @@ def apply_step_flat_stable_walk_rewards(env_cfg) -> None:
     env_cfg.rewards.feet_air_time.weight = 0.25
     env_cfg.rewards.feet_air_time.func = mdp.feet_air_time_positive_biped
     env_cfg.rewards.feet_air_time.params["threshold"] = 0.25
-    env_cfg.rewards.feet_air_time_variance.weight = -2.0
+    env_cfg.rewards.feet_air_time_variance.weight = -3.0
     env_cfg.rewards.feet_air_time_variance.params["sensor_cfg"].body_names = [env_cfg.foot_link_name]
+    env_cfg.rewards.biped_gait_phase_l2 = RewTerm(
+        func=mdp.biped_gait_phase_l2,
+        weight=-2.5,
+        params={
+            "command_name": "base_velocity",
+            "command_threshold": 0.1,
+            "max_time": 0.45,
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=["R_Leg_foot", "L_Leg_foot"]),
+        },
+    )
     env_cfg.rewards.feet_flight_penalty.weight = -0.1
     env_cfg.rewards.feet_flight_penalty.params["sensor_cfg"].body_names = [env_cfg.foot_link_name]
     env_cfg.rewards.feet_slide.weight = -0.15
@@ -92,6 +102,17 @@ def apply_step_flat_stable_walk_rewards(env_cfg) -> None:
         params={
             "command_name": "base_velocity",
             "stance_width": 0.20,
+            "yaw_threshold": 0.15,
+            "yaw_scale": 0.65,
+            "asset_cfg": SceneEntityCfg("robot", body_names=["R_Leg_foot", "L_Leg_foot"]),
+        },
+    )
+    env_cfg.rewards.feet_forward_position_y_l2 = RewTerm(
+        func=mdp.feet_forward_position_y_l2_straight_yaw_command,
+        weight=-0.35,
+        params={
+            "command_name": "base_velocity",
+            "stance_length": 0.18,
             "yaw_threshold": 0.15,
             "yaw_scale": 0.65,
             "asset_cfg": SceneEntityCfg("robot", body_names=["R_Leg_foot", "L_Leg_foot"]),

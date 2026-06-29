@@ -131,19 +131,6 @@ The flat STEP environment is intentionally split into small files:
   terminations.
 - `offline_ground_plane.py`: optional offline ground-plane patch.
 
-## Public Fork Scope
-
-This repository should be described as a derivative fork, not as the upstream
-`robot_lab` project. Use phrasing like:
-
-> I maintain a public fork of `fan-ziqi/robot_lab` focused on the RND STEP
-> humanoid reinforcement-learning environment and sim-to-real training workflow.
-
-Do not describe this fork as the official `robot_lab` repository or as being
-maintained by upstream unless that becomes true.
-
-Before publishing, review [docs/publication_checklist.md](docs/publication_checklist.md).
-
 ## Attribution
 
 This project is derived from
