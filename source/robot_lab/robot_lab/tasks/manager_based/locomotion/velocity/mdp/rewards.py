@@ -409,6 +409,27 @@ def action_sync(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg, joint_groups:
     return reward
 
 
+def signed_joint_pair_l2(
+    env: ManagerBasedRLEnv,
+    asset_cfg: SceneEntityCfg,
+    joint_pairs: list[list[str]],
+) -> torch.Tensor:
+    """Penalize mirrored joint pairs that should keep opposite signs."""
+    asset: Articulation = env.scene[asset_cfg.name]
+    if not hasattr(env, "signed_joint_pair_cache") or env.signed_joint_pair_cache is None:
+        env.signed_joint_pair_cache = [
+            [asset.find_joints(joint_name)[0] for joint_name in joint_pair] for joint_pair in joint_pairs
+        ]
+
+    reward = torch.zeros(env.num_envs, device=env.device)
+    for left_ids, right_ids in env.signed_joint_pair_cache:
+        signed_pair_error = asset.data.joint_pos[:, left_ids] + asset.data.joint_pos[:, right_ids]
+        reward += torch.mean(torch.square(signed_pair_error), dim=1)
+    reward *= 1 / len(joint_pairs) if len(joint_pairs) > 0 else 0.0
+    reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+    return reward
+
+
 def feet_air_time(
     env: ManagerBasedRLEnv, command_name: str, sensor_cfg: SceneEntityCfg, threshold: float
 ) -> torch.Tensor:
@@ -487,6 +508,29 @@ def biped_gait_phase_l2(
     left_right_phase_error = torch.square(contact_time[:, 0] - air_time[:, 1])
     right_left_phase_error = torch.square(contact_time[:, 1] - air_time[:, 0])
     reward = (left_right_phase_error + right_left_phase_error) / (max_time**2)
+    reward *= torch.linalg.norm(env.command_manager.get_command(command_name), dim=1) > command_threshold
+    reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+    return reward
+
+
+def biped_phase_duration_l2(
+    env: ManagerBasedRLEnv,
+    command_name: str,
+    sensor_cfg: SceneEntityCfg,
+    command_threshold: float = 0.1,
+    max_time: float = 0.4,
+) -> torch.Tensor:
+    """Penalize one foot staying in stance or swing for too long during biped walking."""
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    contact_time = contact_sensor.data.current_contact_time[:, sensor_cfg.body_ids]
+    air_time = contact_sensor.data.current_air_time[:, sensor_cfg.body_ids]
+
+    if contact_time.shape[1] != 2:
+        raise ValueError("biped_phase_duration_l2 expects exactly two foot bodies.")
+
+    contact_excess = torch.clamp(contact_time - max_time, min=0.0)
+    air_excess = torch.clamp(air_time - max_time, min=0.0)
+    reward = torch.sum(torch.square(contact_excess) + torch.square(air_excess), dim=1) / (max_time**2)
     reward *= torch.linalg.norm(env.command_manager.get_command(command_name), dim=1) > command_threshold
     reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
     return reward
@@ -612,6 +656,34 @@ def feet_lateral_position_x_l2_straight_yaw_command(
     else:
         desired_x = torch.linspace(-0.5, 0.5, n_feet, device=env.device).unsqueeze(0) * stance_width
     reward = torch.sum(torch.square(foot_pos_b[:, :, 0] - desired_x), dim=1) / (stance_width**2)
+    reward *= _straight_yaw_command_gate(env, command_name, yaw_threshold, yaw_scale)
+    reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+    return reward
+
+
+def feet_lateral_center_x_l2_straight_yaw_command(
+    env: ManagerBasedRLEnv,
+    command_name: str,
+    stance_width: float,
+    yaw_threshold: float,
+    yaw_scale: float,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """Penalize both biped feet drifting to the same lateral side of the base."""
+    asset: RigidObject = env.scene[asset_cfg.name]
+    foot_pos_w = asset.data.body_link_pos_w[:, asset_cfg.body_ids, :] - asset.data.root_link_pos_w[:, :].unsqueeze(1)
+    n_feet = len(asset_cfg.body_ids)
+    foot_pos_b = torch.zeros(env.num_envs, n_feet, 3, device=env.device)
+    for i in range(n_feet):
+        foot_pos_b[:, i, :] = math_utils.quat_apply(
+            math_utils.quat_conjugate(asset.data.root_link_quat_w), foot_pos_w[:, i, :]
+        )
+
+    if n_feet != 2:
+        raise ValueError("feet_lateral_center_x_l2_straight_yaw_command expects exactly two feet.")
+
+    center_x = torch.mean(foot_pos_b[:, :, 0], dim=1) / stance_width
+    reward = torch.square(center_x)
     reward *= _straight_yaw_command_gate(env, command_name, yaw_threshold, yaw_scale)
     reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
     return reward
@@ -845,6 +917,14 @@ def lateral_lin_vel_x_yaw_l2(
     asset: RigidObject = env.scene[asset_cfg.name]
     vel_yaw = quat_apply_inverse(yaw_quat(asset.data.root_quat_w), asset.data.root_lin_vel_w[:, :3])
     reward = torch.square(vel_yaw[:, 0])
+    reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+    return reward
+
+
+def lateral_tilt_x_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
+    """Penalize persistent side lean along STEP's lateral body x-axis."""
+    asset: RigidObject = env.scene[asset_cfg.name]
+    reward = torch.square(asset.data.projected_gravity_b[:, 0])
     reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
     return reward
 
