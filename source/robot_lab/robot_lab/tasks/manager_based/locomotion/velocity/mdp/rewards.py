@@ -745,7 +745,8 @@ def feet_lateral_position_x_l2_straight_yaw_command(
         )
 
     if n_feet == 2:
-        desired_x = torch.tensor([-0.5, 0.5], device=env.device).unsqueeze(0) * stance_width
+        # STEP URDF places the right foot on positive body-frame x and the left foot on negative x.
+        desired_x = torch.tensor([0.5, -0.5], device=env.device).unsqueeze(0) * stance_width
     else:
         desired_x = torch.linspace(-0.5, 0.5, n_feet, device=env.device).unsqueeze(0) * stance_width
     reward = torch.sum(torch.square(foot_pos_b[:, :, 0] - desired_x), dim=1) / (stance_width**2)

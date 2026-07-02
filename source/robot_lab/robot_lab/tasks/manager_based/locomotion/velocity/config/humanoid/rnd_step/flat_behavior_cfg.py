@@ -64,7 +64,7 @@ def apply_step_flat_stable_walk_rewards(env_cfg) -> None:
     env_cfg.rewards.joint_deviation_hip_l1.weight = -0.03
     env_cfg.rewards.joint_deviation_hip_yaw_l1 = RewTerm(
         func=mdp.joint_deviation_l1_straight_yaw_command,
-        weight=-0.12,
+        weight=-0.18,
         params={
             "command_name": "base_velocity",
             "yaw_threshold": 0.15,
@@ -72,9 +72,9 @@ def apply_step_flat_stable_walk_rewards(env_cfg) -> None:
             "asset_cfg": SceneEntityCfg("robot", joint_names=[".*hip_yaw.*"]),
         },
     )
-    env_cfg.rewards.leg_joint_symmetry_l2 = RewTerm(
+    env_cfg.rewards.lateral_roll_joint_symmetry_l2 = RewTerm(
         func=mdp.signed_joint_pair_l2_straight_yaw_command,
-        weight=-0.28,
+        weight=-0.18,
         params={
             "command_name": "base_velocity",
             "yaw_threshold": 0.15,
@@ -83,9 +83,6 @@ def apply_step_flat_stable_walk_rewards(env_cfg) -> None:
             "joint_pairs": [
                 ["R_Leg_hip_yaw", "L_Leg_hip_yaw"],
                 ["R_Leg_hip_roll", "L_Leg_hip_roll"],
-                ["R_Leg_hip_pitch", "L_Leg_hip_pitch"],
-                ["R_Leg_knee", "L_Leg_knee"],
-                ["R_Leg_ankle_pitch", "L_Leg_ankle_pitch"],
                 ["R_Leg_ankle_roll", "L_Leg_ankle_roll"],
             ],
         },
