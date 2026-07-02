@@ -39,15 +39,37 @@ class UniformThresholdVelocityCommand(mdp.UniformVelocityCommand):
         super().__init__(cfg, env)
         # Track which robots were on pit terrain in the previous step
         self.was_on_pit = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
+        self.vel_command_target_b = torch.zeros_like(self.vel_command_b)
+        self.command_ramp_rates = (
+            torch.tensor(cfg.command_ramp_rates, device=self.device).unsqueeze(0)
+            if cfg.command_ramp_rates is not None
+            else None
+        )
 
-    def _resample_command(self, env_ids: Sequence[int]):
-        """Resample velocity commands with threshold."""
-        super()._resample_command(env_ids)
+    def _sample_command_target(self, env_ids: Sequence[int]):
+        """Sample the target command while the exposed command can ramp toward it."""
+        r = torch.empty(len(env_ids), device=self.device)
+        self.vel_command_target_b[env_ids, 0] = r.uniform_(*self.cfg.ranges.lin_vel_x)
+        self.vel_command_target_b[env_ids, 1] = r.uniform_(*self.cfg.ranges.lin_vel_y)
+        self.vel_command_target_b[env_ids, 2] = r.uniform_(*self.cfg.ranges.ang_vel_z)
+        if self.cfg.heading_command:
+            self.heading_target[env_ids] = r.uniform_(*self.cfg.ranges.heading)
+            self.is_heading_env[env_ids] = r.uniform_(0.0, 1.0) <= self.cfg.rel_heading_envs
+        self.is_standing_env[env_ids] = r.uniform_(0.0, 1.0) <= self.cfg.rel_standing_envs
         # set small commands to zero
         threshold = getattr(self.cfg, "zero_velocity_threshold", 0.2)
-        self.vel_command_b[env_ids, :2] *= (
-            torch.norm(self.vel_command_b[env_ids, :2], dim=1) > threshold
+        self.vel_command_target_b[env_ids, :2] *= (
+            torch.norm(self.vel_command_target_b[env_ids, :2], dim=1) > threshold
         ).unsqueeze(1)
+
+    def _resample_command(self, env_ids: Sequence[int]):
+        """Resample target velocity commands with threshold."""
+        previous_command = self.vel_command_b[env_ids].clone()
+        self._sample_command_target(env_ids)
+        if self.command_ramp_rates is None:
+            self.vel_command_b[env_ids] = self.vel_command_target_b[env_ids]
+        else:
+            self.vel_command_b[env_ids] = previous_command
 
     def _update_command(self):
         """Update commands and apply terrain-aware restrictions in real-time.
@@ -58,13 +80,18 @@ class UniformThresholdVelocityCommand(mdp.UniformVelocityCommand):
         3. For robots leaving pits: resamples their commands
         4. For robots on pits: restricts to forward-only movement and sets heading to 0
         """
-        # First, call parent's update command
+        previous_command = self.vel_command_b.clone()
+
+        # First, call parent's update command on the sampled target.
+        self.vel_command_b[:] = self.vel_command_target_b
         super()._update_command()
 
         # Isaac Lab resolves heading from the body x-axis by default.
         # Some robots in this workspace use a different physical forward axis.
         if self.cfg.heading_command and self.cfg.heading_offset != 0.0:
-            heading_env_ids = torch.logical_and(self.is_heading_env, ~self.is_standing_env).nonzero(as_tuple=False).flatten()
+            heading_env_ids = torch.logical_and(self.is_heading_env, ~self.is_standing_env).nonzero(
+                as_tuple=False
+            ).flatten()
             if len(heading_env_ids) > 0:
                 forward_heading = self.robot.data.heading_w[heading_env_ids] + self.cfg.heading_offset
                 heading_error = math_utils.wrap_to_pi(self.heading_target[heading_env_ids] - forward_heading)
@@ -82,7 +109,8 @@ class UniformThresholdVelocityCommand(mdp.UniformVelocityCommand):
         if left_pit_mask.any():
             left_pit_env_ids = torch.where(left_pit_mask)[0]
             # Resample commands for robots that left pits
-            self._resample_command(left_pit_env_ids)
+            self._sample_command_target(left_pit_env_ids)
+            self.vel_command_b[left_pit_env_ids] = self.vel_command_target_b[left_pit_env_ids]
 
         # For robots currently on pits: restrict to forward-only movement with min/max speed
         if on_pits.any():
@@ -96,6 +124,15 @@ class UniformThresholdVelocityCommand(mdp.UniformVelocityCommand):
             # Set heading to 0 for pit robots
             if self.cfg.heading_command:
                 self.heading_target[pit_env_ids] = 0.0
+            self.vel_command_target_b[pit_env_ids] = self.vel_command_b[pit_env_ids]
+
+        if self.command_ramp_rates is not None:
+            max_delta = self.command_ramp_rates * self._env.step_dt
+            self.vel_command_b[:] = previous_command + torch.clamp(
+                self.vel_command_b - previous_command,
+                min=-max_delta,
+                max=max_delta,
+            )
 
         # Update tracking state
         self.was_on_pit = on_pits
@@ -108,6 +145,7 @@ class UniformThresholdVelocityCommandCfg(mdp.UniformVelocityCommandCfg):
     class_type: type = UniformThresholdVelocityCommand
     zero_velocity_threshold: float = 0.2
     heading_offset: float = 0.0
+    command_ramp_rates: tuple[float, float, float] | None = None
 
 
 class DiscreteCommandController(CommandTerm):

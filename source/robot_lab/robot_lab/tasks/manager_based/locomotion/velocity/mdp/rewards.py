@@ -99,6 +99,8 @@ def track_heading_command_exp(
 
     cmd_lin_speed = torch.linalg.norm(env.command_manager.get_command(command_name)[:, :2], dim=1)
     reward *= (cmd_lin_speed > lin_vel_threshold).float()
+    if hasattr(command_term, "is_heading_env"):
+        reward *= command_term.is_heading_env.float()
     reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
     return reward
 
@@ -416,17 +418,38 @@ def signed_joint_pair_l2(
 ) -> torch.Tensor:
     """Penalize mirrored joint pairs that should keep opposite signs."""
     asset: Articulation = env.scene[asset_cfg.name]
-    if not hasattr(env, "signed_joint_pair_cache") or env.signed_joint_pair_cache is None:
-        env.signed_joint_pair_cache = [
+    cache_key = tuple(tuple(joint_pair) for joint_pair in joint_pairs)
+    if (
+        not hasattr(env, "signed_joint_pair_cache")
+        or env.signed_joint_pair_cache is None
+        or not isinstance(env.signed_joint_pair_cache, dict)
+    ):
+        env.signed_joint_pair_cache = {}
+    if cache_key not in env.signed_joint_pair_cache:
+        env.signed_joint_pair_cache[cache_key] = [
             [asset.find_joints(joint_name)[0] for joint_name in joint_pair] for joint_pair in joint_pairs
         ]
 
     reward = torch.zeros(env.num_envs, device=env.device)
-    for left_ids, right_ids in env.signed_joint_pair_cache:
+    for left_ids, right_ids in env.signed_joint_pair_cache[cache_key]:
         signed_pair_error = asset.data.joint_pos[:, left_ids] + asset.data.joint_pos[:, right_ids]
         reward += torch.mean(torch.square(signed_pair_error), dim=1)
     reward *= 1 / len(joint_pairs) if len(joint_pairs) > 0 else 0.0
     reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+    return reward
+
+
+def signed_joint_pair_l2_straight_yaw_command(
+    env: ManagerBasedRLEnv,
+    command_name: str,
+    yaw_threshold: float,
+    yaw_scale: float,
+    asset_cfg: SceneEntityCfg,
+    joint_pairs: list[list[str]],
+) -> torch.Tensor:
+    """Penalize mirrored joint-pair error mainly during straight walking."""
+    reward = signed_joint_pair_l2(env, asset_cfg=asset_cfg, joint_pairs=joint_pairs)
+    reward *= _straight_yaw_command_gate(env, command_name, yaw_threshold, yaw_scale)
     return reward
 
 
@@ -490,6 +513,19 @@ def feet_air_time_variance_penalty(env: ManagerBasedRLEnv, sensor_cfg: SceneEnti
     return reward
 
 
+def feet_air_time_variance_penalty_straight_yaw_command(
+    env: ManagerBasedRLEnv,
+    command_name: str,
+    yaw_threshold: float,
+    yaw_scale: float,
+    sensor_cfg: SceneEntityCfg,
+) -> torch.Tensor:
+    """Penalize left/right foot timing variance mainly for straight commands."""
+    reward = feet_air_time_variance_penalty(env, sensor_cfg=sensor_cfg)
+    reward *= _straight_yaw_command_gate(env, command_name, yaw_threshold, yaw_scale)
+    return reward
+
+
 def biped_gait_phase_l2(
     env: ManagerBasedRLEnv,
     command_name: str,
@@ -513,6 +549,27 @@ def biped_gait_phase_l2(
     return reward
 
 
+def biped_gait_phase_l2_straight_yaw_command(
+    env: ManagerBasedRLEnv,
+    command_name: str,
+    sensor_cfg: SceneEntityCfg,
+    yaw_threshold: float,
+    yaw_scale: float,
+    command_threshold: float = 0.1,
+    max_time: float = 0.5,
+) -> torch.Tensor:
+    """Penalize limp biped timing strongly for straight commands and weakly during turns."""
+    reward = biped_gait_phase_l2(
+        env,
+        command_name=command_name,
+        sensor_cfg=sensor_cfg,
+        command_threshold=command_threshold,
+        max_time=max_time,
+    )
+    reward *= _straight_yaw_command_gate(env, command_name, yaw_threshold, yaw_scale)
+    return reward
+
+
 def biped_phase_duration_l2(
     env: ManagerBasedRLEnv,
     command_name: str,
@@ -533,6 +590,27 @@ def biped_phase_duration_l2(
     reward = torch.sum(torch.square(contact_excess) + torch.square(air_excess), dim=1) / (max_time**2)
     reward *= torch.linalg.norm(env.command_manager.get_command(command_name), dim=1) > command_threshold
     reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+    return reward
+
+
+def biped_phase_duration_l2_straight_yaw_command(
+    env: ManagerBasedRLEnv,
+    command_name: str,
+    sensor_cfg: SceneEntityCfg,
+    yaw_threshold: float,
+    yaw_scale: float,
+    command_threshold: float = 0.1,
+    max_time: float = 0.4,
+) -> torch.Tensor:
+    """Limit excessively long stance/swing phases mainly for straight commands."""
+    reward = biped_phase_duration_l2(
+        env,
+        command_name=command_name,
+        sensor_cfg=sensor_cfg,
+        command_threshold=command_threshold,
+        max_time=max_time,
+    )
+    reward *= _straight_yaw_command_gate(env, command_name, yaw_threshold, yaw_scale)
     return reward
 
 
@@ -573,6 +651,21 @@ def feet_contact_without_cmd(env: ManagerBasedRLEnv, command_name: str, sensor_c
     contact = contact_sensor.compute_first_contact(env.step_dt)[:, sensor_cfg.body_ids]
     reward = torch.sum(contact, dim=-1).float()
     reward *= torch.linalg.norm(env.command_manager.get_command(command_name), dim=1) < 0.1
+    reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+    return reward
+
+
+def feet_stance_contact_without_cmd(
+    env: ManagerBasedRLEnv,
+    command_name: str,
+    sensor_cfg: SceneEntityCfg,
+    command_threshold: float = 0.08,
+) -> torch.Tensor:
+    """Reward sustained foot contact while the command is near zero."""
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    in_contact = contact_sensor.data.current_contact_time[:, sensor_cfg.body_ids] > 0.0
+    reward = torch.mean(in_contact.float(), dim=1)
+    reward *= torch.linalg.norm(env.command_manager.get_command(command_name), dim=1) < command_threshold
     reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
     return reward
 
@@ -979,4 +1072,16 @@ def body_flat_orientation_l2(
     )
     reward = torch.mean(torch.sum(torch.square(gravity_b[..., :2]), dim=2), dim=1)
     reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+    return reward
+
+
+def body_flat_orientation_l2_without_cmd(
+    env: ManagerBasedRLEnv,
+    command_name: str,
+    command_threshold: float = 0.08,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """Penalize selected body roll/pitch strongly when the command is near zero."""
+    reward = body_flat_orientation_l2(env, asset_cfg=asset_cfg)
+    reward *= torch.linalg.norm(env.command_manager.get_command(command_name), dim=1) < command_threshold
     return reward

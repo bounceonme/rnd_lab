@@ -70,6 +70,7 @@ simulation_app = app_launcher.app
 """Rest everything follows."""
 
 import gymnasium as gym
+import numpy as np
 import os
 import time
 import torch
@@ -116,13 +117,75 @@ def _add_wasd_keyboard_bindings(controller: Se2Keyboard):
     controller._INPUT_KEY_MAPPING["D"] = controller._INPUT_KEY_MAPPING["RIGHT"].copy()
 
 
-def _keyboard_command_for_task(task_name: str, command: torch.Tensor) -> torch.Tensor:
-    """Map default SE(2) keyboard axes to the task's locomotion command axes."""
-    if "RND-Step" in task_name:
-        # IsaacLab keyboard: +x=up/down, +y=left/right.
-        # step robot forward axis is body -y and lateral axis is body x.
-        return torch.stack((command[..., 1], -command[..., 0], command[..., 2]), dim=-1)
-    return command
+def _set_rnd_step_keyboard_bindings(controller: Se2Keyboard, env_cfg) -> None:
+    """Bind keys directly in the RND STEP policy command frame."""
+    lateral_speed = _keyboard_sensitivity(env_cfg.commands.base_velocity.ranges.lin_vel_x, fallback=0.5)
+    forward_speed = _keyboard_sensitivity(env_cfg.commands.base_velocity.ranges.lin_vel_y, fallback=0.5)
+    yaw_speed = _keyboard_sensitivity(env_cfg.commands.base_velocity.ranges.ang_vel_z, fallback=0.5)
+
+    controller._INPUT_KEY_MAPPING.update(
+        {
+            # STEP forward is body -y; body +x is the robot's left side.
+            "NUMPAD_8": np.asarray([0.0, -forward_speed, 0.0]),
+            "UP": np.asarray([0.0, -forward_speed, 0.0]),
+            "W": np.asarray([0.0, -forward_speed, 0.0]),
+            "NUMPAD_2": np.asarray([0.0, forward_speed, 0.0]),
+            "DOWN": np.asarray([0.0, forward_speed, 0.0]),
+            "S": np.asarray([0.0, forward_speed, 0.0]),
+            "NUMPAD_4": np.asarray([lateral_speed, 0.0, 0.0]),
+            "LEFT": np.asarray([lateral_speed, 0.0, 0.0]),
+            "A": np.asarray([lateral_speed, 0.0, 0.0]),
+            "NUMPAD_6": np.asarray([-lateral_speed, 0.0, 0.0]),
+            "RIGHT": np.asarray([-lateral_speed, 0.0, 0.0]),
+            "D": np.asarray([-lateral_speed, 0.0, 0.0]),
+            "NUMPAD_7": np.asarray([0.0, 0.0, yaw_speed]),
+            "Z": np.asarray([0.0, 0.0, yaw_speed]),
+            "NUMPAD_9": np.asarray([0.0, 0.0, -yaw_speed]),
+            "X": np.asarray([0.0, 0.0, -yaw_speed]),
+        }
+    )
+
+
+def _make_keyboard_command_manager_fn(
+    controller: Se2Keyboard,
+    env_cfg,
+    command_name: str = "base_velocity",
+    ramp_rates: tuple[float, float, float] | None = None,
+):
+    ramp_rates_tensor = torch.tensor(ramp_rates, dtype=torch.float32) if ramp_rates is not None else None
+    command_state = {"value": None}
+    heading_offset = getattr(env_cfg.commands.base_velocity, "heading_offset", 0.0)
+    zero_velocity_threshold = env_cfg.commands.base_velocity.zero_velocity_threshold
+
+    def command_fn(env):
+        target_command = torch.as_tensor(controller.advance(), dtype=torch.float32, device=env.device).unsqueeze(0)
+        if command_state["value"] is None:
+            command_state["value"] = torch.zeros_like(target_command)
+
+        if ramp_rates_tensor is None:
+            command_state["value"] = target_command.clone()
+        else:
+            max_delta = ramp_rates_tensor.to(env.device).unsqueeze(0) * env.step_dt
+            command_state["value"] += torch.clamp(
+                target_command - command_state["value"], min=-max_delta, max=max_delta
+            )
+
+        command_term = env.command_manager.get_term(command_name)
+        command = command_state["value"]
+        if hasattr(command_term, "vel_command_target_b"):
+            command_term.vel_command_target_b[: command.shape[0]] = command
+        if hasattr(command_term, "vel_command_b"):
+            command_term.vel_command_b[: command.shape[0]] = command
+        if hasattr(command_term, "is_heading_env"):
+            command_term.is_heading_env[: command.shape[0]] = False
+        if hasattr(command_term, "is_standing_env"):
+            command_term.is_standing_env[: command.shape[0]] = torch.linalg.norm(command, dim=1) < zero_velocity_threshold
+        if hasattr(command_term, "heading_target"):
+            command_term.heading_target[: command.shape[0]] = env.scene["robot"].data.heading_w[: command.shape[0]] + heading_offset
+
+        return command_term.command[: command.shape[0]]
+
+    return command_fn
 
 
 @hydra_task_config(args_cli.task, args_cli.agent)
@@ -158,21 +221,19 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
         env_cfg.terminations.time_out = None
         env_cfg.commands.base_velocity.debug_vis = False
         config = Se2KeyboardCfg(
-            v_x_sensitivity=_keyboard_sensitivity(env_cfg.commands.base_velocity.ranges.lin_vel_y, fallback=0.5)
-            if "RND-Step" in task_name
-            else _keyboard_sensitivity(env_cfg.commands.base_velocity.ranges.lin_vel_x, fallback=0.5),
-            v_y_sensitivity=_keyboard_sensitivity(env_cfg.commands.base_velocity.ranges.lin_vel_x, fallback=0.5)
-            if "RND-Step" in task_name
-            else _keyboard_sensitivity(env_cfg.commands.base_velocity.ranges.lin_vel_y, fallback=0.5),
+            v_x_sensitivity=_keyboard_sensitivity(env_cfg.commands.base_velocity.ranges.lin_vel_x, fallback=0.5),
+            v_y_sensitivity=_keyboard_sensitivity(env_cfg.commands.base_velocity.ranges.lin_vel_y, fallback=0.5),
             omega_z_sensitivity=_keyboard_sensitivity(env_cfg.commands.base_velocity.ranges.ang_vel_z, fallback=0.5),
         )
         controller = Se2Keyboard(config)
-        _add_wasd_keyboard_bindings(controller)
-        env_cfg.observations.policy.velocity_commands = ObsTerm(
-            func=lambda env: _keyboard_command_for_task(
-                task_name, torch.tensor(controller.advance(), dtype=torch.float32, device=env.device).unsqueeze(0)
-            ),
-        )
+        if "RND-Step" in task_name:
+            _set_rnd_step_keyboard_bindings(controller, env_cfg)
+            keyboard_ramp_rates = getattr(env_cfg.commands.base_velocity, "command_ramp_rates", (0.4, 0.8, 1.8))
+        else:
+            _add_wasd_keyboard_bindings(controller)
+            keyboard_ramp_rates = None
+        keyboard_command_fn = _make_keyboard_command_manager_fn(controller, env_cfg, ramp_rates=keyboard_ramp_rates)
+        env_cfg.observations.policy.velocity_commands = ObsTerm(func=keyboard_command_fn)
 
     # specify directory for logging experiments
     log_root_path = os.path.join("logs", "rsl_rl", agent_cfg.experiment_name)
