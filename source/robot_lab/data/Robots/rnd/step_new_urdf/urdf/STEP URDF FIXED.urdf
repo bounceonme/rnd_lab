@@ -1,0 +1,692 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="step_humanoid">
+  <link name="base_link">
+    <inertial>
+      <origin xyz="5.3585E-05 -0.029542 -0.030884" rpy="0 0 0" />
+      <mass value="0.51277" />
+      <inertia ixx="0.00017653" ixy="-3.3055E-08" ixz="4.2219E-09" iyy="0.00027767" iyz="-1.9404E-06" izz="0.00028031" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/base_link.STL" />
+      </geometry>
+      <material name="base_link_material">
+        <color rgba="0.41176 0.41176 0.41176 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="right_hip_yaw_link">
+    <inertial>
+      <origin xyz="-0.021068 0.0036566 -0.0012693" rpy="0 0 0" />
+      <mass value="0.08121" />
+      <inertia ixx="2.5555E-05" ixy="1.2683E-09" ixz="-2.4505E-07" iyy="0.00010724" iyz="-8.3528E-08" izz="0.00010685" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/R_Leg_hip.STL" />
+      </geometry>
+      <material name="right_hip_yaw_link_material">
+        <color rgba="0.37647 0.37647 0.37647 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/R_Leg_hip.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_hip_yaw_joint" type="revolute">
+    <origin xyz="-0.071027 -0.036348 -0.0616" rpy="3.1416 0 -1.5708" />
+    <parent link="base_link" />
+    <child link="right_hip_yaw_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="8.4" velocity="4.71238898038469" />
+  </joint>
+  <link name="right_hip_roll_link">
+    <inertial>
+      <origin xyz="-0.00021138 -0.017648 -0.054917" rpy="0 0 0" />
+      <mass value="0.3419" />
+      <inertia ixx="0.00014057" ixy="-1.9434E-06" ixz="8.4441E-09" iyy="8.584E-05" iyz="-1.9236E-06" izz="0.00014139" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/R_Leg_hip_double.STL" />
+      </geometry>
+      <material name="right_hip_roll_link_material">
+        <color rgba="0.41176 0.41176 0.41176 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/R_Leg_hip_double.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_hip_roll_joint" type="revolute">
+    <origin xyz="-0.07904 0.0005 0.030391" rpy="-1.5708 0 1.5708" />
+    <parent link="right_hip_yaw_link" />
+    <child link="right_hip_roll_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="8.4" velocity="4.71238898038469" />
+  </joint>
+  <link name="right_thigh_link">
+    <inertial>
+      <origin xyz="-0.0049683 0.056943 -0.0308" rpy="0 0 0" />
+      <mass value="0.11367" />
+      <inertia ixx="7.9115E-05" ixy="1.5943E-05" ixz="-9.7906E-12" iyy="3.2575E-05" iyz="9.209E-12" izz="6.7261E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/R_Leg_thighs.STL" />
+      </geometry>
+      <material name="right_thigh_link_material">
+        <color rgba="0.86667 0.9098 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/R_Leg_thighs.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_hip_pitch_joint" type="revolute">
+    <origin xyz="-0.0308 -0.03589 -0.07773" rpy="3.1416 1.5708 0" />
+    <parent link="right_hip_roll_link" />
+    <child link="right_thigh_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="8.4" velocity="4.71238898038469" />
+  </joint>
+  <link name="right_calf_link">
+    <inertial>
+      <origin xyz="-0.0022018 -0.024491 -0.030452" rpy="0 0 0" />
+      <mass value="0.20962" />
+      <inertia ixx="0.00013089" ixy="1.5628E-05" ixz="3.6767E-09" iyy="8.7901E-05" iyz="-1.9399E-06" izz="0.0001033" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/R_Leg_calf.STL" />
+      </geometry>
+      <material name="right_calf_link_material">
+        <color rgba="0.86667 0.9098 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/R_Leg_calf.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_knee_pitch_joint" type="revolute">
+    <origin xyz="-0.031029 0.10025 0" rpy="0 0 -2.4441" />
+    <parent link="right_thigh_link" />
+    <child link="right_calf_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="8.4" velocity="4.71238898038469" />
+  </joint>
+  <link name="right_ankle_link">
+    <inertial>
+      <origin xyz="0.022816 -0.018242 -0.030585" rpy="0 0 0" />
+      <mass value="0.3419" />
+      <inertia ixx="0.00014139" ixy="1.9176E-06" ixz="8.4441E-09" iyy="8.584E-05" iyz="-1.9374E-06" izz="0.00014057" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/R_Leg_ankle.STL" />
+      </geometry>
+      <material name="right_ankle_link_material">
+        <color rgba="0.41176 0.41176 0.41176 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/R_Leg_ankle.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_ankle_pitch_joint" type="revolute">
+    <origin xyz="0.022584 -0.093739 0" rpy="0 0 0.70796" />
+    <parent link="right_calf_link" />
+    <child link="right_ankle_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="8.4" velocity="4.71238898038469" />
+  </joint>
+  <link name="right_foot_link">
+    <inertial>
+      <origin xyz="-0.00016999 0.032607 -0.060803" rpy="0 0 0" />
+      <mass value="0.084269" />
+      <inertia ixx="0.00013026" ixy="-1.3786E-09" ixz="6.7419E-08" iyy="0.00017596" iyz="-5.6845E-10" izz="5.2192E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/R_Leg_foot.STL" />
+      </geometry>
+      <material name="right_foot_link_material">
+        <color rgba="0.86667 0.9098 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/R_Leg_foot.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_ankle_roll_joint" type="revolute">
+    <origin xyz="0.07773 -0.03589 -0.0308" rpy="0 -1.5708 3.1416" />
+    <parent link="right_ankle_link" />
+    <child link="right_foot_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="8.4" velocity="4.71238898038469" />
+  </joint>
+  <link name="left_hip_yaw_link">
+    <inertial>
+      <origin xyz="0.021068 0.0035588 -0.001272" rpy="0 0 0" />
+      <mass value="0.08121" />
+      <inertia ixx="2.5555E-05" ixy="1.2683E-09" ixz="2.4505E-07" iyy="0.00010724" iyz="8.3528E-08" izz="0.00010685" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/L_Leg_hip.STL" />
+      </geometry>
+      <material name="left_hip_yaw_link_material">
+        <color rgba="0.37647 0.37647 0.37647 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/L_Leg_hip.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_hip_yaw_joint" type="revolute">
+    <origin xyz="0.071173 -0.036348 -0.0616" rpy="-3.1416 0 1.5708" />
+    <parent link="base_link" />
+    <child link="left_hip_yaw_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="8.4" velocity="4.71238898038469" />
+  </joint>
+  <link name="left_hip_roll_link">
+    <inertial>
+      <origin xyz="0.00021474 -0.017648 -0.054914" rpy="0 0 0" />
+      <mass value="0.3419" />
+      <inertia ixx="0.00014057" ixy="1.9374E-06" ixz="8.4441E-09" iyy="8.584E-05" iyz="-1.9176E-06" izz="0.00014139" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/L_Leg_hip_double.STL" />
+      </geometry>
+      <material name="left_hip_roll_link_material">
+        <color rgba="0.86667 0.9098 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/L_Leg_hip_double.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_hip_roll_joint" type="revolute">
+    <origin xyz="0.0790399999998856 -0.000500004039074131 0.0303914536643952" rpy="-1.57079632680575 0 -1.57079632676978" />
+    <parent link="left_hip_yaw_link" />
+    <child link="left_hip_roll_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="8.4" velocity="4.71238898038469" />
+  </joint>
+  <link name="left_thigh_link">
+    <inertial>
+      <origin xyz="0.0049683 0.056943 -0.0308" rpy="0 0 0" />
+      <mass value="0.11367" />
+      <inertia ixx="7.9115E-05" ixy="-1.5943E-05" ixz="-9.7908E-12" iyy="3.2575E-05" iyz="-9.2094E-12" izz="6.7261E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/L_Leg_thighs.STL" />
+      </geometry>
+      <material name="left_thigh_link_material">
+        <color rgba="0.86667 0.9098 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/L_Leg_thighs.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_hip_pitch_joint" type="revolute">
+    <origin xyz="0.0308 -0.03589 -0.07773" rpy="0 -1.5708 -3.1416" />
+    <parent link="left_hip_roll_link" />
+    <child link="left_thigh_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="8.4" velocity="4.71238898038469" />
+  </joint>
+  <link name="left_calf_link">
+    <inertial>
+      <origin xyz="0.0022071 -0.024492 -0.030453" rpy="0 0 0" />
+      <mass value="0.20962" />
+      <inertia ixx="0.00013089" ixy="-1.5634E-05" ixz="3.6767E-09" iyy="8.7901E-05" iyz="-1.9409E-06" izz="0.0001033" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/L_Leg_calf.STL" />
+      </geometry>
+      <material name="left_calf_link_material">
+        <color rgba="0.86667 0.9098 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/L_Leg_calf.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_knee_pitch_joint" type="revolute">
+    <origin xyz="0.031029 0.10025 0" rpy="0 0 2.4435" />
+    <parent link="left_thigh_link" />
+    <child link="left_calf_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="8.4" velocity="4.71238898038469" />
+  </joint>
+  <link name="left_ankle_link">
+    <inertial>
+      <origin xyz="-0.022813 -0.018242 -0.030589" rpy="0 0 0" />
+      <mass value="0.3419" />
+      <inertia ixx="0.00014139" ixy="-1.9236E-06" ixz="8.4441E-09" iyy="8.584E-05" iyz="-1.9434E-06" izz="0.00014057" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/L_Leg_ankle.STL" />
+      </geometry>
+      <material name="left_ankle_link_material">
+        <color rgba="0.41176 0.41176 0.41176 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/L_Leg_ankle.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_ankle_pitch_joint" type="revolute">
+    <origin xyz="-0.022585 -0.093743 0" rpy="0 0 -0.70796" />
+    <parent link="left_calf_link" />
+    <child link="left_ankle_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="8.4" velocity="4.71238898038469" />
+  </joint>
+  <link name="left_foot_link">
+    <inertial>
+      <origin xyz="-0.00018856 0.032607 -0.060803" rpy="0 0 0" />
+      <mass value="0.084269" />
+      <inertia ixx="0.00013026" ixy="-1.3786E-09" ixz="-6.2696E-08" iyy="0.00017596" iyz="-5.6808E-10" izz="5.2192E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/L_Leg_foot.STL" />
+      </geometry>
+      <material name="left_foot_link_material">
+        <color rgba="0.86667 0.9098 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/L_Leg_foot.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_ankle_roll_joint" type="revolute">
+    <origin xyz="-0.07773 -0.03589 -0.0308" rpy="3.1416 1.5708 0" />
+    <parent link="left_ankle_link" />
+    <child link="left_foot_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="8.4" velocity="4.71238898038469" />
+  </joint>
+  <link name="torso_link">
+    <inertial>
+      <origin xyz="-0.00039083 -0.0050187 0.049301" rpy="0 0 0" />
+      <mass value="1.6853" />
+      <inertia ixx="0.00091772" ixy="-5.0148E-06" ixz="-3.6232E-09" iyy="0.0025848" iyz="-3.1124E-07" izz="0.0024262" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/Upper_Body.STL" />
+      </geometry>
+      <material name="torso_link_material">
+        <color rgba="0.86667 0.9098 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/Upper_Body.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="waist_yaw_joint" type="revolute">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="torso_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="8.4" velocity="4.71238898038469" />
+  </joint>
+  <link name="right_shoulder_yaw_link">
+    <inertial>
+      <origin xyz="-0.0032353 -2.7733E-12 0.019229" rpy="0 0 0" />
+      <mass value="0.019087" />
+      <inertia ixx="1.3968E-05" ixy="-3.0057E-17" ixz="1.2918E-06" iyy="8.6346E-06" iyz="-2.1011E-18" izz="9.6296E-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/R_Arm_shoulder.STL" />
+      </geometry>
+      <material name="right_shoulder_yaw_link_material">
+        <color rgba="0.86667 0.9098 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/R_Arm_shoulder.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_shoulder_yaw_joint" type="revolute">
+    <origin xyz="-0.083498 0.0039294 0.085072" rpy="0 -1.5708 0" />
+    <parent link="torso_link" />
+    <child link="right_shoulder_yaw_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="6" velocity="6.59734457253857" />
+  </joint>
+  <link name="right_upper_arm_link">
+    <inertial>
+      <origin xyz="1.5063E-05 -0.040916 -0.022615" rpy="0 0 0" />
+      <mass value="0.16253" />
+      <inertia ixx="4.0987E-05" ixy="-3.2529E-07" ixz="1.4746E-12" iyy="2.8371E-05" iyz="-3.2529E-07" izz="4.0987E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/R_Arm_upper.STL" />
+      </geometry>
+      <material name="right_upper_arm_link_material">
+        <color rgba="0.85098 0.85098 0.85098 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/R_Arm_upper.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_shoulder_pitch_joint" type="revolute">
+    <origin xyz="-0.025548 -0.022225 0.039672" rpy="-1.5708 0 3.1416" />
+    <parent link="right_shoulder_yaw_link" />
+    <child link="right_upper_arm_link" />
+    <axis xyz="0 0 -1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="2.5" velocity="5.75958653158129" />
+  </joint>
+  <link name="right_forearm_link">
+    <inertial>
+      <origin xyz="-0.003208 0.068561 -0.022626" rpy="0 0 0" />
+      <mass value="0.11139" />
+      <inertia ixx="4.633E-05" ixy="-6.0299E-07" ixz="7.3542E-10" iyy="2.5834E-05" iyz="-3.221E-07" izz="3.4799E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/R_Arm_lower.STL" />
+      </geometry>
+      <material name="right_forearm_link_material">
+        <color rgba="0.86667 0.9098 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/R_Arm_lower.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_elbow_pitch_joint" type="revolute">
+    <origin xyz="-0.022975 -0.081831 -0.0226" rpy="3.1416 1.5708 0" />
+    <parent link="right_upper_arm_link" />
+    <child link="right_forearm_link" />
+    <axis xyz="0 0 -1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="2.5" velocity="5.75958653158129" />
+  </joint>
+  <link name="right_hand_link">
+    <inertial>
+      <origin xyz="0.018631 0.038368 -0.02258" rpy="0 0 0" />
+      <mass value="0.018532" />
+      <inertia ixx="1.7778E-05" ixy="-1.2817E-06" ixz="-3.8282E-10" iyy="8.5162E-06" iyz="-3.2918E-09" izz="1.2239E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/R_Arm_hand.STL" />
+      </geometry>
+      <material name="right_hand_link_material">
+        <color rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/R_Arm_hand.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_hand_joint" type="revolute">
+    <origin xyz="0 0.078998 0" rpy="0 0 0" />
+    <parent link="right_forearm_link" />
+    <child link="right_hand_link" />
+    <axis xyz="0 0 -1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="2.5" velocity="5.75958653158129" />
+  </joint>
+  <link name="left_shoulder_yaw_link">
+    <inertial>
+      <origin xyz="0.0032353 5.0626E-12 0.019229" rpy="0 0 0" />
+      <mass value="0.019087" />
+      <inertia ixx="1.3968E-05" ixy="1.0013E-18" ixz="-1.2918E-06" iyy="8.6346E-06" iyz="8.6286E-20" izz="9.6296E-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/L_Arm_shoulder.STL" />
+      </geometry>
+      <material name="left_shoulder_yaw_link_material">
+        <color rgba="0.86667 0.9098 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/L_Arm_shoulder.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_shoulder_yaw_joint" type="revolute">
+    <origin xyz="0.083445 0.0039294 0.085072" rpy="0 1.5708 0" />
+    <parent link="torso_link" />
+    <child link="left_shoulder_yaw_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="6" velocity="6.59734457253857" />
+  </joint>
+  <link name="left_upper_arm_link">
+    <inertial>
+      <origin xyz="-1.5063E-05 -0.040916 -0.022615" rpy="0 0 0" />
+      <mass value="0.16253" />
+      <inertia ixx="4.0987E-05" ixy="3.2528E-07" ixz="1.4746E-12" iyy="2.8371E-05" iyz="-3.2528E-07" izz="4.0987E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/L_Arm_upper.STL" />
+      </geometry>
+      <material name="left_upper_arm_link_material">
+        <color rgba="0.85098 0.85098 0.85098 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/L_Arm_upper.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_shoulder_pitch_joint" type="revolute">
+    <origin xyz="0.025548 -0.022225 0.039672" rpy="-1.5708 0 -3.1416" />
+    <parent link="left_shoulder_yaw_link" />
+    <child link="left_upper_arm_link" />
+    <axis xyz="0 0 -1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="2.5" velocity="5.75958653158129" />
+  </joint>
+  <link name="left_forearm_link">
+    <inertial>
+      <origin xyz="0.003208 0.068561 -0.022243" rpy="0 0 0" />
+      <mass value="0.11139" />
+      <inertia ixx="4.633E-05" ixy="6.0299E-07" ixz="7.3542E-10" iyy="2.5834E-05" iyz="-3.2848E-07" izz="3.4799E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/L_Arm_lower.STL" />
+      </geometry>
+      <material name="left_forearm_link_material">
+        <color rgba="0.86667 0.9098 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/L_Arm_lower.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_elbow_pitch_joint" type="revolute">
+    <origin xyz="0.0226 -0.081831 -0.0226" rpy="3.1416 -1.5708 0" />
+    <parent link="left_upper_arm_link" />
+    <child link="left_forearm_link" />
+    <axis xyz="0 0 -1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="2.5" velocity="5.75958653158129" />
+  </joint>
+  <link name="left_hand_link">
+    <inertial>
+      <origin xyz="-0.018631 0.038368 -0.02262" rpy="0 0 0" />
+      <mass value="0.018532" />
+      <inertia ixx="1.7778E-05" ixy="1.2817E-06" ixz="-3.8282E-10" iyy="8.5162E-06" iyz="3.2918E-09" izz="1.2239E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/L_Arm_hand.STL" />
+      </geometry>
+      <material name="left_hand_link_material">
+        <color rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/L_Arm_hand.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_hand_joint" type="revolute">
+    <origin xyz="0 0.078998 0.000375" rpy="0 0 0" />
+    <parent link="left_forearm_link" />
+    <child link="left_hand_link" />
+    <axis xyz="0 0 -1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="2.5" velocity="5.75958653158129" />
+  </joint>
+  <link name="neck_yaw_link">
+    <inertial>
+      <origin xyz="-2.8823E-05 -0.0046672 0.028195" rpy="0 0 0" />
+      <mass value="0.081827" />
+      <inertia ixx="1.8731E-05" ixy="6.9662E-13" ixz="-3.2529E-07" iyy="2.2526E-05" iyz="2.0296E-08" izz="1.4391E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/Neck.STL" />
+      </geometry>
+      <material name="neck_yaw_link_material">
+        <color rgba="0.86667 0.9098 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/Neck.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="neck_yaw_joint" type="revolute">
+    <origin xyz="0 -0.040141 0.14855" rpy="0 0 3.1416" />
+    <parent link="torso_link" />
+    <child link="neck_yaw_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="2.5" velocity="5.75958653158129" />
+  </joint>
+  <link name="head_link">
+    <inertial>
+      <origin xyz="-0.041657 -2.3522E-05 -0.022351" rpy="0 0 0" />
+      <mass value="0.088177" />
+      <inertia ixx="4.8833E-05" ixy="-1.1583E-08" ixz="-6.3919E-07" iyy="4.9891E-05" iyz="-2.2617E-09" izz="8.3925E-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/head.STL" />
+      </geometry>
+      <material name="head_link_material">
+        <color rgba="0.69804 0.69804 0.69804 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://STEP URDF FIXED/meshes/head.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="neck_pitch_joint" type="revolute">
+    <origin xyz="-0.022899 -0.0049021 0.041461" rpy="1.5708 0 -1.5708" />
+    <parent link="neck_yaw_link" />
+    <child link="head_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14159265358979" upper="3.14159265358979" effort="2.5" velocity="5.75958653158129" />
+  </joint>
+</robot>

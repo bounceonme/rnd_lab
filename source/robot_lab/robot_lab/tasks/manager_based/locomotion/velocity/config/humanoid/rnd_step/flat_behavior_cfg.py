@@ -29,8 +29,8 @@ def apply_step_flat_stable_walk_rewards(env_cfg) -> None:
     env_cfg.rewards.track_heading_command_exp.weight = 0.5
     env_cfg.rewards.lin_vel_z_l2.weight = -0.2
     env_cfg.rewards.lateral_lin_vel_x_yaw_l2 = RewTerm(func=mdp.lateral_lin_vel_x_yaw_l2, weight=-0.6)
-    env_cfg.rewards.lateral_tilt_x_l2 = RewTerm(func=mdp.lateral_tilt_x_l2, weight=-4.0)
-    env_cfg.rewards.base_height_l2.weight = -3.0
+    env_cfg.rewards.lateral_tilt_x_l2 = RewTerm(func=mdp.lateral_tilt_x_l2, weight=-6.0)
+    env_cfg.rewards.base_height_l2.weight = -4.5
     env_cfg.rewards.base_height_l2.params["target_height"] = STEP_BASE_HEIGHT_TARGET
 
     env_cfg.rewards.body_lin_acc_l2.weight = -0.05
@@ -56,25 +56,25 @@ def apply_step_flat_stable_walk_rewards(env_cfg) -> None:
     )
 
     env_cfg.rewards.action_rate_l2.weight = -0.02
-    env_cfg.rewards.stand_still.weight = -0.55
+    env_cfg.rewards.stand_still.weight = -0.3
     env_cfg.rewards.stand_still.params["command_threshold"] = 0.08
-    env_cfg.rewards.joint_pos_penalty.weight = -0.35
-    env_cfg.rewards.joint_pos_penalty.params["stand_still_scale"] = 6.0
+    env_cfg.rewards.joint_pos_penalty.weight = -0.25
+    env_cfg.rewards.joint_pos_penalty.params["stand_still_scale"] = 4.0
     env_cfg.rewards.joint_pos_penalty.params["command_threshold"] = 0.08
     env_cfg.rewards.joint_deviation_hip_l1.weight = -0.03
     env_cfg.rewards.joint_deviation_hip_yaw_l1 = RewTerm(
         func=mdp.joint_deviation_l1_straight_yaw_command,
-        weight=-0.18,
+        weight=-0.30,
         params={
             "command_name": "base_velocity",
-            "yaw_threshold": 0.15,
-            "yaw_scale": 0.65,
+            "yaw_threshold": 0.10,
+            "yaw_scale": 0.45,
             "asset_cfg": SceneEntityCfg("robot", joint_names=[".*hip_yaw.*"]),
         },
     )
     env_cfg.rewards.lateral_roll_joint_symmetry_l2 = RewTerm(
         func=mdp.signed_joint_pair_l2_straight_yaw_command,
-        weight=-0.18,
+        weight=-0.5,
         params={
             "command_name": "base_velocity",
             "yaw_threshold": 0.15,
@@ -133,7 +133,7 @@ def apply_step_flat_stable_walk_rewards(env_cfg) -> None:
     env_cfg.rewards.feet_flight_penalty.params["sensor_cfg"].body_names = [env_cfg.foot_link_name]
     env_cfg.rewards.feet_stance_contact_without_cmd = RewTerm(
         func=mdp.feet_stance_contact_without_cmd,
-        weight=0.8,
+        weight=0.3,
         params={
             "command_name": "base_velocity",
             "command_threshold": 0.08,
@@ -144,30 +144,56 @@ def apply_step_flat_stable_walk_rewards(env_cfg) -> None:
     env_cfg.rewards.feet_height.weight = 0.0
     env_cfg.rewards.feet_min_lateral_distance_x_l2 = RewTerm(
         func=mdp.feet_min_lateral_distance_x_l2,
-        weight=-4.0,
+        weight=-3.0,
         params={
-            # Foot mesh lateral width is about 0.095 m, so 0.185 m leaves roughly 9 cm of inner clearance.
-            "min_width": 0.185,
+            "min_width": 0.16,
+            # Body-frame x is negative on STEP's right side and positive on its left side.
+            "lateral_signs": (-1.0, 1.0),
+            "asset_cfg": SceneEntityCfg("robot", body_names=["R_Leg_foot", "L_Leg_foot"], preserve_order=True),
+        },
+    )
+    env_cfg.rewards.feet_max_lateral_distance_x_l2 = RewTerm(
+        func=mdp.feet_max_lateral_distance_x_l2,
+        weight=-1.5,
+        params={
+            "max_width": 0.23,
             "asset_cfg": SceneEntityCfg("robot", body_names=[env_cfg.foot_link_name]),
+        },
+    )
+    env_cfg.rewards.feet_heading_error_exp = RewTerm(
+        func=mdp.feet_heading_error_exp_straight_yaw_command,
+        weight=-1.0,
+        params={
+            "command_name": "base_velocity",
+            "yaw_threshold": 0.10,
+            "yaw_scale": 0.45,
+            "std": 0.25,
+            "parallel_std": 0.30,
+            "parallel_scale": 0.5,
+            # STEP foot local -Z points toward the robot's physical body -Y forward direction.
+            "foot_forward_axis": (0.0, 0.0, -1.0),
+            "body_forward_axis": (0.0, -1.0, 0.0),
+            "asset_cfg": SceneEntityCfg("robot", body_names=["R_Leg_foot", "L_Leg_foot"]),
         },
     )
     env_cfg.rewards.feet_lateral_position_x_l2 = RewTerm(
         func=mdp.feet_lateral_position_x_l2_straight_yaw_command,
-        weight=-2.0,
+        weight=-1.0,
         params={
             "command_name": "base_velocity",
-            "stance_width": 0.22,
+            # FK of STEP_DEFAULT_JOINT_POS gives about 0.193 m between foot link origins.
+            "stance_width": 0.19,
             "yaw_threshold": 0.15,
             "yaw_scale": 0.65,
-            "asset_cfg": SceneEntityCfg("robot", body_names=["R_Leg_foot", "L_Leg_foot"]),
+            "asset_cfg": SceneEntityCfg("robot", body_names=["R_Leg_foot", "L_Leg_foot"], preserve_order=True),
         },
     )
     env_cfg.rewards.feet_lateral_center_x_l2 = RewTerm(
         func=mdp.feet_lateral_center_x_l2_straight_yaw_command,
-        weight=-4.0,
+        weight=-2.0,
         params={
             "command_name": "base_velocity",
-            "stance_width": 0.22,
+            "stance_width": 0.19,
             "yaw_threshold": 0.15,
             "yaw_scale": 0.65,
             "asset_cfg": SceneEntityCfg("robot", body_names=["R_Leg_foot", "L_Leg_foot"]),
@@ -199,7 +225,7 @@ def apply_step_flat_commands(env_cfg) -> None:
     env_cfg.commands.base_velocity.ranges.lin_vel_y = (-0.65, -0.05)
     env_cfg.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
     env_cfg.commands.base_velocity.zero_velocity_threshold = 0.05
-    env_cfg.commands.base_velocity.rel_standing_envs = 0.18
+    env_cfg.commands.base_velocity.rel_standing_envs = 0.12
     env_cfg.commands.base_velocity.rel_heading_envs = 0.4
     env_cfg.commands.base_velocity.heading_command = True
     env_cfg.commands.base_velocity.command_ramp_rates = (0.4, 0.8, 1.8)

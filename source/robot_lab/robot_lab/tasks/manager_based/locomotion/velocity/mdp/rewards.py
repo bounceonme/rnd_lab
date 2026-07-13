@@ -707,9 +707,38 @@ def feet_distance_y_exp(
 
 
 def feet_min_lateral_distance_x_l2(
-    env: ManagerBasedRLEnv, min_width: float, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
+    env: ManagerBasedRLEnv,
+    min_width: float,
+    lateral_signs: tuple[float, float] | None = None,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
 ) -> torch.Tensor:
-    """Penalize biped feet only when their body-frame x-axis separation is narrower than the minimum width."""
+    """Penalize a narrow stance, optionally preserving the expected left/right foot order."""
+    asset: RigidObject = env.scene[asset_cfg.name]
+    foot_pos_w = asset.data.body_link_pos_w[:, asset_cfg.body_ids, :] - asset.data.root_link_pos_w[:, :].unsqueeze(1)
+    n_feet = len(asset_cfg.body_ids)
+    foot_pos_b = torch.zeros(env.num_envs, n_feet, 3, device=env.device)
+    for i in range(n_feet):
+        foot_pos_b[:, i, :] = math_utils.quat_apply(
+            math_utils.quat_conjugate(asset.data.root_link_quat_w), foot_pos_w[:, i, :]
+        )
+
+    if lateral_signs is None:
+        lateral_width = torch.max(foot_pos_b[:, :, 0], dim=1)[0] - torch.min(foot_pos_b[:, :, 0], dim=1)[0]
+    else:
+        if n_feet != len(lateral_signs):
+            raise ValueError("lateral_signs must contain one sign for each configured foot.")
+        signs = torch.tensor(lateral_signs, device=env.device, dtype=foot_pos_b.dtype)
+        lateral_width = torch.sum(foot_pos_b[:, :, 0] * signs.unsqueeze(0), dim=1)
+    width_deficit = torch.clamp(min_width - lateral_width, min=0.0) / min_width
+    reward = torch.square(width_deficit)
+    reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+    return reward
+
+
+def feet_max_lateral_distance_x_l2(
+    env: ManagerBasedRLEnv, max_width: float, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
+) -> torch.Tensor:
+    """Penalize biped feet when their body-frame x-axis separation is wider than the maximum width."""
     asset: RigidObject = env.scene[asset_cfg.name]
     foot_pos_w = asset.data.body_link_pos_w[:, asset_cfg.body_ids, :] - asset.data.root_link_pos_w[:, :].unsqueeze(1)
     n_feet = len(asset_cfg.body_ids)
@@ -720,9 +749,59 @@ def feet_min_lateral_distance_x_l2(
         )
 
     lateral_width = torch.max(foot_pos_b[:, :, 0], dim=1)[0] - torch.min(foot_pos_b[:, :, 0], dim=1)[0]
-    width_deficit = torch.clamp(min_width - lateral_width, min=0.0) / min_width
-    reward = torch.square(width_deficit)
+    width_excess = torch.clamp(lateral_width - max_width, min=0.0) / max_width
+    reward = torch.square(width_excess)
     reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+    return reward
+
+
+def feet_heading_error_exp_straight_yaw_command(
+    env: ManagerBasedRLEnv,
+    command_name: str,
+    yaw_threshold: float,
+    yaw_scale: float,
+    std: float,
+    parallel_std: float,
+    parallel_scale: float,
+    foot_forward_axis: tuple[float, float, float],
+    body_forward_axis: tuple[float, float, float],
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """Penalize body-relative foot yaw and opposing foot headings without blocking commanded turns."""
+    asset: Articulation = env.scene[asset_cfg.name]
+    foot_quat_w = asset.data.body_link_quat_w[:, asset_cfg.body_ids, :]
+    n_feet = foot_quat_w.shape[1]
+    if n_feet != 2:
+        raise ValueError("feet_heading_error_exp_straight_yaw_command expects exactly two feet.")
+
+    foot_forward_local = torch.tensor(foot_forward_axis, device=env.device, dtype=foot_quat_w.dtype)
+    foot_forward_local = foot_forward_local.view(1, 1, 3).expand(env.num_envs, n_feet, -1)
+    foot_forward_w = math_utils.quat_apply(foot_quat_w.reshape(-1, 4), foot_forward_local.reshape(-1, 3)).view(
+        env.num_envs, n_feet, 3
+    )
+
+    root_yaw_w = yaw_quat(asset.data.root_link_quat_w).unsqueeze(1).expand(-1, n_feet, -1)
+    foot_forward_b = math_utils.quat_apply_inverse(root_yaw_w.reshape(-1, 4), foot_forward_w.reshape(-1, 3)).view(
+        env.num_envs, n_feet, 3
+    )
+
+    foot_heading_b = foot_forward_b[..., :2]
+    foot_heading_b = foot_heading_b / torch.linalg.vector_norm(foot_heading_b, dim=2, keepdim=True).clamp_min(1e-6)
+    desired_heading_b = torch.tensor(body_forward_axis[:2], device=env.device, dtype=foot_quat_w.dtype)
+    desired_heading_b = desired_heading_b / torch.linalg.vector_norm(desired_heading_b).clamp_min(1e-6)
+
+    heading_dot = torch.sum(foot_heading_b * desired_heading_b.view(1, 1, 2), dim=2)
+    heading_cross = desired_heading_b[0] * foot_heading_b[..., 1] - desired_heading_b[1] * foot_heading_b[..., 0]
+    heading_error = torch.atan2(heading_cross, heading_dot)
+    alignment_error = torch.mean(1.0 - torch.exp(-torch.square(heading_error) / std**2), dim=1)
+    alignment_error *= _straight_yaw_command_gate(env, command_name, yaw_threshold, yaw_scale)
+
+    heading_difference = heading_error[:, 0] - heading_error[:, 1]
+    heading_difference = torch.atan2(torch.sin(heading_difference), torch.cos(heading_difference))
+    parallel_error = 1.0 - torch.exp(-torch.square(heading_difference) / parallel_std**2)
+
+    reward = alignment_error + parallel_scale * parallel_error
+    reward *= torch.clamp(-asset.data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
     return reward
 
 
@@ -745,8 +824,8 @@ def feet_lateral_position_x_l2_straight_yaw_command(
         )
 
     if n_feet == 2:
-        # STEP URDF places the right foot on positive body-frame x and the left foot on negative x.
-        desired_x = torch.tensor([0.5, -0.5], device=env.device).unsqueeze(0) * stance_width
+        # STEP URDF places the right foot on negative body-frame x and the left foot on positive x.
+        desired_x = torch.tensor([-0.5, 0.5], device=env.device).unsqueeze(0) * stance_width
     else:
         desired_x = torch.linspace(-0.5, 0.5, n_feet, device=env.device).unsqueeze(0) * stance_width
     reward = torch.sum(torch.square(foot_pos_b[:, :, 0] - desired_x), dim=1) / (stance_width**2)

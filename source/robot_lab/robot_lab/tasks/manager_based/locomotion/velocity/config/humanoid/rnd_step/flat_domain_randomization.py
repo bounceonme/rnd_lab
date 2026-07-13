@@ -14,8 +14,14 @@ def apply_step_flat_domain_randomization(env_cfg) -> None:
     env_cfg.events.randomize_rigid_body_material.params["restitution_range"] = (0.0, 0.15)
     env_cfg.events.randomize_rigid_body_material.params["make_consistent"] = True
 
-    env_cfg.events.randomize_rigid_body_mass_base.params["mass_distribution_params"] = (-0.12, 0.22)
-    env_cfg.events.randomize_rigid_body_mass_others.params["mass_distribution_params"] = (0.85, 1.15)
+    # The URDF totals 5.33629 kg while the assembled robot measured 5.646 kg. Treat the
+    # 0.30971 kg difference as uncertain upper-body payload merged into base_link.
+    measured_mass_offset = 5.646 - 5.33629
+    env_cfg.events.randomize_rigid_body_mass_base.params["mass_distribution_params"] = (
+        measured_mass_offset - 0.11,
+        measured_mass_offset + 0.11,
+    )
+    env_cfg.events.randomize_rigid_body_mass_others.params["mass_distribution_params"] = (0.95, 1.05)
 
     env_cfg.events.randomize_com_positions.params["asset_cfg"].body_names = [env_cfg.base_link_name]
     env_cfg.events.randomize_com_positions.params["com_range"] = {
@@ -24,8 +30,11 @@ def apply_step_flat_domain_randomization(env_cfg) -> None:
         "z": (-0.010, 0.010),
     }
 
-    env_cfg.events.randomize_apply_external_force_torque.params["force_range"] = (-3.0, 3.0)
-    env_cfg.events.randomize_apply_external_force_torque.params["torque_range"] = (-1.0, 1.0)
+    # This reset event applies a persistent wrench for the whole episode. Keep it
+    # below the level that makes a continuously leaned posture the optimal gait;
+    # interval velocity pushes still provide larger transient disturbances.
+    env_cfg.events.randomize_apply_external_force_torque.params["force_range"] = (-1.0, 1.0)
+    env_cfg.events.randomize_apply_external_force_torque.params["torque_range"] = (-0.25, 0.25)
     env_cfg.events.randomize_actuator_gains = None
 
     env_cfg.events.randomize_push_robot.interval_range_s = (10.0, 15.0)

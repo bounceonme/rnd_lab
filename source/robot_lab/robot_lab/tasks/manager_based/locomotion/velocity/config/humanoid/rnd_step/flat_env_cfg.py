@@ -32,6 +32,12 @@ class RndStepFlatEnvCfg(RndStepRoughEnvCfg):
         apply_step_flat_terminations(self)
         apply_step_flat_commands(self)
         self.actions.joint_pos.scale = _dampen_arm_actions(self.actions.joint_pos.scale)
+        # The CAD URDF exports all joints with +/-pi limits. Keep knee targets on the
+        # anatomically valid side of the straight-leg configuration in this task.
+        self.actions.joint_pos.clip = {
+            "R_Leg_knee": (-0.50, 2.12),
+            "L_Leg_knee": (-2.12, 0.50),
+        }
 
         if self.__class__.__name__ == "RndStepFlatEnvCfg":
             self.disable_zero_weight_rewards()

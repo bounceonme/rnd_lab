@@ -29,7 +29,7 @@ parser.add_argument("--num_envs", type=int, default=1, help="Number of environme
 parser.add_argument(
     "--task",
     type=str,
-    default="RobotLab-Isaac-Velocity-Flat-RND-Step-v0",
+    default="RNDLab-Isaac-Velocity-Flat-RND-Step-v0",
     help="Name of the task.",
 )
 AppLauncher.add_app_launcher_args(parser)

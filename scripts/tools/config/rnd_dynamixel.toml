@@ -1,0 +1,109 @@
+# RND STEP Dynamixel mapping. The application refuses hardware access until
+# every ID, zero_raw, direction, and raw limit is verified and configured=true.
+
+[bus]
+configured = true
+device = "/dev/ttyUSB0"
+baudrate = 4000000
+protocol = 2.0
+control_table = "mx_2"
+poll_hz = 10.0
+max_goal_step_deg = 5.0
+# MX-106 uses 4096 position counts: valid raw values are 0..4095, centered at 2048.
+ticks_per_revolution = 4096
+
+[[joints]]
+name = "R_Leg_hip_yaw"
+id = 10
+zero_raw = 2048
+direction = 1
+min_raw = 0
+max_raw = 4095
+
+[[joints]]
+name = "R_Leg_hip_roll"
+id = 15
+zero_raw = 2048
+direction = -1
+min_raw = 0
+max_raw = 4095
+
+[[joints]]
+name = "R_Leg_hip_pitch"
+id = 13
+zero_raw = 2048
+direction = 1
+min_raw = 0
+max_raw = 4095
+
+[[joints]]
+name = "R_Leg_knee"
+id = 17
+zero_raw = 2048
+direction = -1
+min_raw = 0
+max_raw = 4095
+
+[[joints]]
+name = "R_Leg_ankle_pitch"
+id = 19
+zero_raw = 2048
+direction = -1
+min_raw = 0
+max_raw = 4095
+
+[[joints]]
+name = "R_Leg_ankle_roll"
+id = 21
+zero_raw = 2048
+direction = 1
+min_raw = 0
+max_raw = 4095
+
+[[joints]]
+name = "L_Leg_hip_yaw"
+id = 12
+zero_raw = 2048
+direction = 1
+min_raw = 0
+max_raw = 4095
+
+[[joints]]
+name = "L_Leg_hip_roll"
+id = 16
+zero_raw = 2048
+direction = -1
+min_raw = 0
+max_raw = 4095
+
+[[joints]]
+name = "L_Leg_hip_pitch"
+id = 14
+zero_raw = 2048
+direction = 1
+min_raw = 0
+max_raw = 4095
+
+[[joints]]
+name = "L_Leg_knee"
+id = 18
+zero_raw = 2048
+direction = -1
+min_raw = 0
+max_raw = 4095
+
+[[joints]]
+name = "L_Leg_ankle_pitch"
+id = 20
+zero_raw = 2048
+direction = -1
+min_raw = 0
+max_raw = 4095
+
+[[joints]]
+name = "L_Leg_ankle_roll"
+id = 22
+zero_raw = 2048
+direction = 1
+min_raw = 0
+max_raw = 4095

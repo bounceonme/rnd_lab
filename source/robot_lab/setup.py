@@ -19,6 +19,7 @@ INSTALL_REQUIRES = [
     "psutil",
     "colorama",
     "xacrodoc",
+    "dynamixel-sdk>=4.0.5",
     # amp
     "numpy",
     "pandas",

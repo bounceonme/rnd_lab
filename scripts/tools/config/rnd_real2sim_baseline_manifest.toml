@@ -1,0 +1,177 @@
+schema_version = 1
+analysis_only = true
+purpose = "Reproducible aggregation of validated suspended RND STEP actuator-identification runs."
+
+[[joints]]
+name = "R_Leg_hip_yaw"
+target_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_161755_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_162559_model.json",
+]
+coulomb_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_161755_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_162559_model.json",
+]
+
+[[joints]]
+name = "R_Leg_hip_roll"
+target_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_041051_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_041414_model.json",
+]
+coulomb_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_041051_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_041414_model.json",
+]
+
+[[joints]]
+name = "R_Leg_hip_pitch"
+target_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_031833_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_032337_model.json",
+]
+coulomb_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_031636_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_031833_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_032337_model.json",
+]
+
+[[joints]]
+name = "R_Leg_knee"
+target_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_024329_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_025551_model.json",
+]
+coulomb_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_024329_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_025551_model.json",
+]
+
+[[joints]]
+name = "R_Leg_ankle_pitch"
+target_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_034222_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_035633_model.json",
+]
+coulomb_models = []
+notes = ["Current-domain Coulomb estimates failed their quality gate; do not mirror the left side."]
+
+[[joints]]
+name = "R_Leg_ankle_roll"
+target_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_043303_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_043558_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_043905_model.json",
+]
+coulomb_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_043303_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_043558_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_043905_model.json",
+]
+
+[[joints]]
+name = "L_Leg_hip_yaw"
+target_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_163408_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_163642_model.json",
+]
+coulomb_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_163408_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_163642_model.json",
+]
+
+[[joints]]
+name = "L_Leg_hip_roll"
+target_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_042145_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_042517_model.json",
+]
+coulomb_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_042145_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_042517_model.json",
+]
+
+[[joints]]
+name = "L_Leg_hip_pitch"
+target_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_032654_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_033004_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_033742_model.json",
+]
+coulomb_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_032654_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_033004_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_033742_model.json",
+]
+
+[[joints]]
+name = "L_Leg_knee"
+target_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_030845_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_031207_model.json",
+]
+coulomb_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_030845_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_031207_model.json",
+]
+
+[[joints]]
+name = "L_Leg_ankle_pitch"
+target_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_040011_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_040442_model.json",
+]
+coulomb_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_040011_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_040442_model.json",
+]
+
+[[joints]]
+name = "L_Leg_ankle_roll"
+target_models = []
+coulomb_models = [
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_044341_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_044709_model.json",
+  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_045311_model.json",
+  "logs/rnd_real2sim/rnd_real2sim_20260713_170340_model.json",
+]
+notes = [
+  "A constant play/backlash target is unsupported because the fitted hysteresis changes with excitation amplitude.",
+  "Keep the current-domain Coulomb evidence, but route target dynamics to a future amplitude-dependent model.",
+]
+
+[[diagnostics]]
+joint = "L_Leg_ankle_roll"
+model = "logs/rnd_real2sim/rnd_real2sim_20260713_170340_model.json"
+micro_triangle_amplitude_deg = 3.0
+purpose = "Amplitude-dependence check; excluded from the constant-play baseline even though its internal fit passes."
+
+[[exclusions]]
+joint = "R_Leg_hip_pitch"
+model = "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_031636_model.json"
+component = "target"
+reason = "Reference gain 0.9331 was not reproduced; the next two standardized runs agree near 0.9742."
+
+[[exclusions]]
+joint = "L_Leg_ankle_roll"
+model = "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_044341_model.json"
+component = "target"
+reason = "Constant-play validation failed at the standard 1.5 deg triangle amplitude."
+
+[[exclusions]]
+joint = "L_Leg_ankle_roll"
+model = "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_044709_model.json"
+component = "target"
+reason = "Constant-play validation failed at the standard 1.5 deg triangle amplitude."
+
+[[exclusions]]
+joint = "L_Leg_ankle_roll"
+model = "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_045311_model.json"
+component = "target"
+reason = "Preconditioning did not rescue constant-play validation at the standard 1.5 deg triangle amplitude."
+
+[[exclusions]]
+joint = "L_Leg_ankle_roll"
+model = "logs/rnd_real2sim/rnd_real2sim_20260713_170340_model.json"
+component = "target"
+reason = "The 3.0 deg triangle fit passes internally but is inconsistent with the 1.5 deg hysteresis, proving amplitude dependence."
