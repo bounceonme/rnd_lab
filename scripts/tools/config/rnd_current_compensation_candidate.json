@@ -1,0 +1,860 @@
+{
+  "analysis_only": true,
+  "application_status": "offline_candidate_requires_current_control_and_bench_validation",
+  "bench_validation": {
+    "recommended_gain_sequence": [
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "required_fixture": "rigidly fixed upper body with full leg clearance before any loaded test",
+    "required_observations": [
+      "tracking error around direction reversals",
+      "zero-velocity creep or limit cycle",
+      "peak and RMS Present Current",
+      "temperature rise and hardware error status"
+    ],
+    "status": "not_run"
+  },
+  "control_contract": {
+    "compensation_velocity_input": "low_level_desired_joint_trajectory_velocity_rad_s",
+    "current_based_position_mode_5_goal_current_semantics": "current_limit_not_additive_feedforward",
+    "direct_current_command_operating_mode": 0,
+    "direct_current_command_requires_external_position_controller": true,
+    "goal_current_unit_a_per_raw": 0.00336,
+    "identified_command": "Goal Position",
+    "identified_current_signal": "Present Current telemetry",
+    "identified_operating_mode": 3,
+    "maximum_candidate_gain": 1.0,
+    "position_mode_3_direct_application_supported": false,
+    "zero_velocity_output_a": 0.0
+  },
+  "created_utc": "2026-07-14T11:45:20.291505+00:00",
+  "hardware_write_enabled": false,
+  "integration_enabled": false,
+  "joint_order": [
+    "R_Leg_hip_yaw",
+    "R_Leg_hip_roll",
+    "R_Leg_hip_pitch",
+    "R_Leg_knee",
+    "R_Leg_ankle_pitch",
+    "R_Leg_ankle_roll",
+    "L_Leg_hip_yaw",
+    "L_Leg_hip_roll",
+    "L_Leg_hip_pitch",
+    "L_Leg_knee",
+    "L_Leg_ankle_pitch",
+    "L_Leg_ankle_roll"
+  ],
+  "joints": {
+    "L_Leg_ankle_pitch": {
+      "current_model": {
+        "direction_convention": "positive desired URDF-joint velocity produces positive motor-current compensation",
+        "evidence_range_a": [
+          0.02478,
+          0.02835
+        ],
+        "law": "gain * Ic * tanh(4 * desired_velocity_rad_s / transition_velocity_rad_s)",
+        "nominal_coulomb_current_a": 0.026565,
+        "nominal_goal_current_raw": 8,
+        "quantization_error_a": 0.0003150000000000028,
+        "quantized_nominal_current_a": 0.02688,
+        "static_breakaway_current_a": null,
+        "transition_velocity_derivation": "4 * source identification velocity threshold, so tanh argument equals 1 at the source threshold",
+        "transition_velocity_rad_s": 0.06981317007977318,
+        "velocity_source": "low_level_desired_joint_trajectory_velocity_not_encoder_velocity",
+        "viscous_current_a_per_rad_s": null
+      },
+      "notes": [],
+      "quality": {
+        "bench_validated": false,
+        "candidate_usable": true,
+        "hardware_integration_allowed": false,
+        "maximum_relative_run_span_allowed": 0.5,
+        "minimum_run_count_pass": true,
+        "relative_run_span": 0.13438735177865616,
+        "repeatability_pass": true,
+        "source_quality_pass": true,
+        "status": "offline_candidate"
+      },
+      "source_evidence": {
+        "coulomb_current_a_values": [
+          0.02478,
+          0.02835
+        ],
+        "domain": "joint-coordinate motor current; not measured joint torque",
+        "run_count": 2,
+        "sources": [
+          {
+            "coulomb_current_a": 0.02478,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_040011_model.json",
+            "model_sha256": "84e5d6997c28ae334b4dc9c18734adbd5507a1918aa12ae38ff3adfac2133e79",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_040011.npz",
+            "source_dataset_sha256": "69c1752717cf95e0d96fefde87727780dfc40cc2def7409a6ba675566592916a",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          },
+          {
+            "coulomb_current_a": 0.02835,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_040442_model.json",
+            "model_sha256": "ebe7c7572b76937a87269f98c4ca64f6d069e22744a98d0b648843f8c40328f0",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_040442.npz",
+            "source_dataset_sha256": "5442a96d0ee3a660a21ed182b7010f03015046f549b3432a17fc077250b8b43b",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          }
+        ]
+      }
+    },
+    "L_Leg_ankle_roll": {
+      "current_model": {
+        "direction_convention": "positive desired URDF-joint velocity produces positive motor-current compensation",
+        "evidence_range_a": [
+          0.18207,
+          0.19383
+        ],
+        "law": "gain * Ic * tanh(4 * desired_velocity_rad_s / transition_velocity_rad_s)",
+        "nominal_coulomb_current_a": 0.19319999999999998,
+        "nominal_goal_current_raw": 58,
+        "quantization_error_a": 0.0016800000000000148,
+        "quantized_nominal_current_a": 0.19488,
+        "static_breakaway_current_a": null,
+        "transition_velocity_derivation": "4 * source identification velocity threshold, so tanh argument equals 1 at the source threshold",
+        "transition_velocity_rad_s": 0.06981317007977318,
+        "velocity_source": "low_level_desired_joint_trajectory_velocity_not_encoder_velocity",
+        "viscous_current_a_per_rad_s": null
+      },
+      "notes": [
+        "The post-alignment 1.5 deg and 3.0 deg traces require a common linear-plus-play command path.",
+        "Keep the post-replacement current-domain Coulomb evidence, but do not convert it to joint torque."
+      ],
+      "quality": {
+        "bench_validated": false,
+        "candidate_usable": true,
+        "hardware_integration_allowed": false,
+        "maximum_relative_run_span_allowed": 0.5,
+        "minimum_run_count_pass": true,
+        "relative_run_span": 0.06086956521739127,
+        "repeatability_pass": true,
+        "source_quality_pass": true,
+        "status": "offline_candidate"
+      },
+      "source_evidence": {
+        "coulomb_current_a_values": [
+          0.18207,
+          0.19319999999999998,
+          0.19383
+        ],
+        "domain": "joint-coordinate motor current; not measured joint torque",
+        "run_count": 3,
+        "sources": [
+          {
+            "coulomb_current_a": 0.18207,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_01_model.json",
+            "model_sha256": "0177b296d80fcdddb64ac74531d3483c722a3fc217833dbbf91dab905d0e1249",
+            "source_dataset": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_01.npz",
+            "source_dataset_sha256": "7dd419948c6d223cdb831f41919b0031d37ec86ebbf6644d35f55dea531c9eda",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          },
+          {
+            "coulomb_current_a": 0.19319999999999998,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_02_model.json",
+            "model_sha256": "3ccdfac02be89c61bed634aca1bb4fe91069e579908554448406b0fdb88e1b2b",
+            "source_dataset": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_02.npz",
+            "source_dataset_sha256": "1b6412a673bd139da7e23d0bbde6ec58ad030449c86859ee18e7b5cf71bc41c2",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          },
+          {
+            "coulomb_current_a": 0.19383,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/l_ankle_roll_post_alignment_diagnostic_01_model.json",
+            "model_sha256": "4466f3d759a1b2a50b9afb7be2e45a0c02934055ae1de0f2ee02dbad9ea963e9",
+            "source_dataset": "logs/rnd_real2sim/l_ankle_roll_post_alignment_diagnostic_01.npz",
+            "source_dataset_sha256": "a123cee7d78d29630e2ccd59b96ca0eefeb393651d402ce31309579a93d66dd3",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          }
+        ]
+      }
+    },
+    "L_Leg_hip_pitch": {
+      "current_model": {
+        "direction_convention": "positive desired URDF-joint velocity produces positive motor-current compensation",
+        "evidence_range_a": [
+          0.023940000000000003,
+          0.0336
+        ],
+        "law": "gain * Ic * tanh(4 * desired_velocity_rad_s / transition_velocity_rad_s)",
+        "nominal_coulomb_current_a": 0.02436,
+        "nominal_goal_current_raw": 7,
+        "quantization_error_a": -0.0008400000000000005,
+        "quantized_nominal_current_a": 0.02352,
+        "static_breakaway_current_a": null,
+        "transition_velocity_derivation": "4 * source identification velocity threshold, so tanh argument equals 1 at the source threshold",
+        "transition_velocity_rad_s": 0.06981317007977318,
+        "velocity_source": "low_level_desired_joint_trajectory_velocity_not_encoder_velocity",
+        "viscous_current_a_per_rad_s": null
+      },
+      "notes": [],
+      "quality": {
+        "bench_validated": false,
+        "candidate_usable": true,
+        "hardware_integration_allowed": false,
+        "maximum_relative_run_span_allowed": 0.5,
+        "minimum_run_count_pass": true,
+        "relative_run_span": 0.3965517241379308,
+        "repeatability_pass": true,
+        "source_quality_pass": true,
+        "status": "offline_candidate"
+      },
+      "source_evidence": {
+        "coulomb_current_a_values": [
+          0.0336,
+          0.02436,
+          0.023940000000000003
+        ],
+        "domain": "joint-coordinate motor current; not measured joint torque",
+        "run_count": 3,
+        "sources": [
+          {
+            "coulomb_current_a": 0.0336,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_032654_model.json",
+            "model_sha256": "4736c6260bb3911df5fcbe7955b809e6cfe9aa5058168f3917f98f9165313ca4",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_032654.npz",
+            "source_dataset_sha256": "5c7304676a2b6547f201a9f26d24019885ebe6a76d03348ca9a6e5431e79d9ee",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          },
+          {
+            "coulomb_current_a": 0.02436,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_033004_model.json",
+            "model_sha256": "6e690ed0a5e8502085e718dc3aa1cbda6463ae9fae88e88da4cf95251fa041ad",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_033004.npz",
+            "source_dataset_sha256": "16e4c16c2a1c19ff2691366e286ad6400ffc726a5f0773d2f7d4470d1580ca12",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          },
+          {
+            "coulomb_current_a": 0.023940000000000003,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_033742_model.json",
+            "model_sha256": "a6c674849e72fda1b3683e056fa912fae858868fce7914360e8f739a45766a75",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_033742.npz",
+            "source_dataset_sha256": "1ced1ba09043971ae45e88e507890f1d544c8eee2fb90b6e1fe5e0079a376136",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          }
+        ]
+      }
+    },
+    "L_Leg_hip_roll": {
+      "current_model": {
+        "direction_convention": "positive desired URDF-joint velocity produces positive motor-current compensation",
+        "evidence_range_a": [
+          0.055020000000000006,
+          0.05985
+        ],
+        "law": "gain * Ic * tanh(4 * desired_velocity_rad_s / transition_velocity_rad_s)",
+        "nominal_coulomb_current_a": 0.057435,
+        "nominal_goal_current_raw": 17,
+        "quantization_error_a": -0.00031499999999999584,
+        "quantized_nominal_current_a": 0.057120000000000004,
+        "static_breakaway_current_a": null,
+        "transition_velocity_derivation": "4 * source identification velocity threshold, so tanh argument equals 1 at the source threshold",
+        "transition_velocity_rad_s": 0.06981317007977318,
+        "velocity_source": "low_level_desired_joint_trajectory_velocity_not_encoder_velocity",
+        "viscous_current_a_per_rad_s": null
+      },
+      "notes": [],
+      "quality": {
+        "bench_validated": false,
+        "candidate_usable": true,
+        "hardware_integration_allowed": false,
+        "maximum_relative_run_span_allowed": 0.5,
+        "minimum_run_count_pass": true,
+        "relative_run_span": 0.08409506398537467,
+        "repeatability_pass": true,
+        "source_quality_pass": true,
+        "status": "offline_candidate"
+      },
+      "source_evidence": {
+        "coulomb_current_a_values": [
+          0.055020000000000006,
+          0.05985
+        ],
+        "domain": "joint-coordinate motor current; not measured joint torque",
+        "run_count": 2,
+        "sources": [
+          {
+            "coulomb_current_a": 0.055020000000000006,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_042145_model.json",
+            "model_sha256": "460d4c9431fbccd5ecf5fe676e8eedd069db0b0519ddb6c0d504a7e666e7035a",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_042145.npz",
+            "source_dataset_sha256": "3341c311dbe805d0d831efa4d8dde19d4130f532c95b7d577f4044764ef9f7e7",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          },
+          {
+            "coulomb_current_a": 0.05985,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_042517_model.json",
+            "model_sha256": "c8f25572c8c35f7ab45ff3be5b3a9caae9d2b0a71c229f0e489f1facd25620a4",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_042517.npz",
+            "source_dataset_sha256": "c605a131ebb7650fdb9f163091d1d3d833aa61dcfd52cfb74d10c10ae55e02d2",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          }
+        ]
+      }
+    },
+    "L_Leg_hip_yaw": {
+      "current_model": {
+        "direction_convention": "positive desired URDF-joint velocity produces positive motor-current compensation",
+        "evidence_range_a": [
+          0.022260000000000002,
+          0.025830000000000002
+        ],
+        "law": "gain * Ic * tanh(4 * desired_velocity_rad_s / transition_velocity_rad_s)",
+        "nominal_coulomb_current_a": 0.024045000000000004,
+        "nominal_goal_current_raw": 7,
+        "quantization_error_a": -0.0005250000000000046,
+        "quantized_nominal_current_a": 0.02352,
+        "static_breakaway_current_a": null,
+        "transition_velocity_derivation": "4 * source identification velocity threshold, so tanh argument equals 1 at the source threshold",
+        "transition_velocity_rad_s": 0.06981317007977318,
+        "velocity_source": "low_level_desired_joint_trajectory_velocity_not_encoder_velocity",
+        "viscous_current_a_per_rad_s": null
+      },
+      "notes": [],
+      "quality": {
+        "bench_validated": false,
+        "candidate_usable": true,
+        "hardware_integration_allowed": false,
+        "maximum_relative_run_span_allowed": 0.5,
+        "minimum_run_count_pass": true,
+        "relative_run_span": 0.148471615720524,
+        "repeatability_pass": true,
+        "source_quality_pass": true,
+        "status": "offline_candidate"
+      },
+      "source_evidence": {
+        "coulomb_current_a_values": [
+          0.025830000000000002,
+          0.022260000000000002
+        ],
+        "domain": "joint-coordinate motor current; not measured joint torque",
+        "run_count": 2,
+        "sources": [
+          {
+            "coulomb_current_a": 0.025830000000000002,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_163408_model.json",
+            "model_sha256": "a762642f52b0543e0fb73d82c5e141349d0f877171590afcedc56036ef4f51bb",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_163408.npz",
+            "source_dataset_sha256": "07222244167245c166416bbe93263a72e0242e6ec63e26c0d38084ecc8410fea",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          },
+          {
+            "coulomb_current_a": 0.022260000000000002,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_163642_model.json",
+            "model_sha256": "3f5d0116d6c59c012607f97bc4efc7ed82cde4d12fc65b8e948812648d7fe753",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_163642.npz",
+            "source_dataset_sha256": "5db4d24648611642f158a4a2d5742a205fffbd1307b986d4c654aa5346edbd72",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          }
+        ]
+      }
+    },
+    "L_Leg_knee": {
+      "current_model": {
+        "direction_convention": "positive desired URDF-joint velocity produces positive motor-current compensation",
+        "evidence_range_a": [
+          0.05964,
+          0.06363
+        ],
+        "law": "gain * Ic * tanh(4 * desired_velocity_rad_s / transition_velocity_rad_s)",
+        "nominal_coulomb_current_a": 0.061635,
+        "nominal_goal_current_raw": 18,
+        "quantization_error_a": -0.0011549999999999963,
+        "quantized_nominal_current_a": 0.060480000000000006,
+        "static_breakaway_current_a": null,
+        "transition_velocity_derivation": "4 * source identification velocity threshold, so tanh argument equals 1 at the source threshold",
+        "transition_velocity_rad_s": 0.06981317007977318,
+        "velocity_source": "low_level_desired_joint_trajectory_velocity_not_encoder_velocity",
+        "viscous_current_a_per_rad_s": null
+      },
+      "notes": [],
+      "quality": {
+        "bench_validated": false,
+        "candidate_usable": true,
+        "hardware_integration_allowed": false,
+        "maximum_relative_run_span_allowed": 0.5,
+        "minimum_run_count_pass": true,
+        "relative_run_span": 0.06473594548551971,
+        "repeatability_pass": true,
+        "source_quality_pass": true,
+        "status": "offline_candidate"
+      },
+      "source_evidence": {
+        "coulomb_current_a_values": [
+          0.06363,
+          0.05964
+        ],
+        "domain": "joint-coordinate motor current; not measured joint torque",
+        "run_count": 2,
+        "sources": [
+          {
+            "coulomb_current_a": 0.06363,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_030845_model.json",
+            "model_sha256": "c565674d5e59857e4819447606a4f50737d930d0e4e752dd07907822e72b2329",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_030845.npz",
+            "source_dataset_sha256": "c65e255e6cd511aab072b66bac2bed3ca31e253203aadc6d264f8171c7e4e7e2",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          },
+          {
+            "coulomb_current_a": 0.05964,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_031207_model.json",
+            "model_sha256": "324cebfcb52776ddf472c1ea60d8b5024b16f38bdefd34382ce5a4e8607faca4",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_031207.npz",
+            "source_dataset_sha256": "fd61c5d32a559556678b7b09ed919619d828e92155151945ca7f981170ae9a20",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          }
+        ]
+      }
+    },
+    "R_Leg_ankle_pitch": {
+      "current_model": null,
+      "notes": [
+        "Current-domain Coulomb estimates failed their quality gate; do not mirror the left side."
+      ],
+      "quality": {
+        "bench_validated": false,
+        "candidate_usable": false,
+        "hardware_integration_allowed": false,
+        "minimum_run_count_pass": false,
+        "relative_run_span": null,
+        "repeatability_pass": false,
+        "source_quality_pass": false,
+        "status": "unavailable_current_evidence"
+      },
+      "source_evidence": {
+        "domain": "joint-coordinate motor current; not measured joint torque",
+        "run_count": 0,
+        "sources": []
+      }
+    },
+    "R_Leg_ankle_roll": {
+      "current_model": {
+        "direction_convention": "positive desired URDF-joint velocity produces positive motor-current compensation",
+        "evidence_range_a": [
+          0.0231,
+          0.0315
+        ],
+        "law": "gain * Ic * tanh(4 * desired_velocity_rad_s / transition_velocity_rad_s)",
+        "nominal_coulomb_current_a": 0.030450000000000005,
+        "nominal_goal_current_raw": 9,
+        "quantization_error_a": -0.00021000000000000185,
+        "quantized_nominal_current_a": 0.030240000000000003,
+        "static_breakaway_current_a": null,
+        "transition_velocity_derivation": "4 * source identification velocity threshold, so tanh argument equals 1 at the source threshold",
+        "transition_velocity_rad_s": 0.06981317007977318,
+        "velocity_source": "low_level_desired_joint_trajectory_velocity_not_encoder_velocity",
+        "viscous_current_a_per_rad_s": null
+      },
+      "notes": [],
+      "quality": {
+        "bench_validated": false,
+        "candidate_usable": true,
+        "hardware_integration_allowed": false,
+        "maximum_relative_run_span_allowed": 0.5,
+        "minimum_run_count_pass": true,
+        "relative_run_span": 0.27586206896551724,
+        "repeatability_pass": true,
+        "source_quality_pass": true,
+        "status": "offline_candidate"
+      },
+      "source_evidence": {
+        "coulomb_current_a_values": [
+          0.0315,
+          0.030450000000000005,
+          0.0231
+        ],
+        "domain": "joint-coordinate motor current; not measured joint torque",
+        "run_count": 3,
+        "sources": [
+          {
+            "coulomb_current_a": 0.0315,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_043303_model.json",
+            "model_sha256": "1a86da9a9f0a710d0f71661088c7e6471e573e6cb860bdc6ed53b98151734837",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_043303.npz",
+            "source_dataset_sha256": "ebb9b1bfd19fc47313253f06e76cb0824bf992b5f3d6191cb1d0c56642964a9c",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          },
+          {
+            "coulomb_current_a": 0.030450000000000005,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_043558_model.json",
+            "model_sha256": "920a02f219451b16fc6fb331a636a6c5384b6ac08a2c7c3077e0cccdff4fb177",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_043558.npz",
+            "source_dataset_sha256": "4ed32e589486c285cf2ab10109488def7143e11b323190aa9dc13361a3086f94",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          },
+          {
+            "coulomb_current_a": 0.0231,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_043905_model.json",
+            "model_sha256": "e30f4a59bf5cbb6abbd23f89a48388d7350f99040d2a6d75a00dcf9a3c74f74e",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_043905.npz",
+            "source_dataset_sha256": "a17cc0183dc74afc5b993b844aaf7b7e3fa21f3c168803753e4cac8f2f6d516d",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          }
+        ]
+      }
+    },
+    "R_Leg_hip_pitch": {
+      "current_model": {
+        "direction_convention": "positive desired URDF-joint velocity produces positive motor-current compensation",
+        "evidence_range_a": [
+          0.07098000000000002,
+          0.07812
+        ],
+        "law": "gain * Ic * tanh(4 * desired_velocity_rad_s / transition_velocity_rad_s)",
+        "nominal_coulomb_current_a": 0.07308,
+        "nominal_goal_current_raw": 22,
+        "quantization_error_a": 0.0008399999999999935,
+        "quantized_nominal_current_a": 0.07392,
+        "static_breakaway_current_a": null,
+        "transition_velocity_derivation": "4 * source identification velocity threshold, so tanh argument equals 1 at the source threshold",
+        "transition_velocity_rad_s": 0.06981317007977318,
+        "velocity_source": "low_level_desired_joint_trajectory_velocity_not_encoder_velocity",
+        "viscous_current_a_per_rad_s": null
+      },
+      "notes": [],
+      "quality": {
+        "bench_validated": false,
+        "candidate_usable": true,
+        "hardware_integration_allowed": false,
+        "maximum_relative_run_span_allowed": 0.5,
+        "minimum_run_count_pass": true,
+        "relative_run_span": 0.09770114942528707,
+        "repeatability_pass": true,
+        "source_quality_pass": true,
+        "status": "offline_candidate"
+      },
+      "source_evidence": {
+        "coulomb_current_a_values": [
+          0.07308,
+          0.07812,
+          0.07098000000000002
+        ],
+        "domain": "joint-coordinate motor current; not measured joint torque",
+        "run_count": 3,
+        "sources": [
+          {
+            "coulomb_current_a": 0.07308,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_031636_model.json",
+            "model_sha256": "5552de98a579afa5b8fb68047df4a059bdcddea92dcb8ac267734dfccdc94fb0",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_031636.npz",
+            "source_dataset_sha256": "eeb3d215ecb78e776750a8b08da129324d42c8125e58b7aade2ca838f2b850af",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          },
+          {
+            "coulomb_current_a": 0.07812,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_031833_model.json",
+            "model_sha256": "3b9b163060a43e17605f0c815f1098ba373f1eedef803fb28368c20ab7359e68",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_031833.npz",
+            "source_dataset_sha256": "443f13d3ee4efa421c73a9f00bf5b4a284b0398dc8fdad9acf0b538a19a2e805",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          },
+          {
+            "coulomb_current_a": 0.07098000000000002,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_032337_model.json",
+            "model_sha256": "e2da80035154deb0193038bf81eca6c263b5391df2dd9da923eb2ab9baac4fce",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_032337.npz",
+            "source_dataset_sha256": "243bc7e38da3b9eda66dc6ca24c55398b70bd2371b0457866d9f8963993bd7e2",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          }
+        ]
+      }
+    },
+    "R_Leg_hip_roll": {
+      "current_model": {
+        "direction_convention": "positive desired URDF-joint velocity produces positive motor-current compensation",
+        "evidence_range_a": [
+          0.01785,
+          0.02037
+        ],
+        "law": "gain * Ic * tanh(4 * desired_velocity_rad_s / transition_velocity_rad_s)",
+        "nominal_coulomb_current_a": 0.019110000000000002,
+        "nominal_goal_current_raw": 6,
+        "quantization_error_a": 0.0010499999999999989,
+        "quantized_nominal_current_a": 0.02016,
+        "static_breakaway_current_a": null,
+        "transition_velocity_derivation": "4 * source identification velocity threshold, so tanh argument equals 1 at the source threshold",
+        "transition_velocity_rad_s": 0.06981317007977318,
+        "velocity_source": "low_level_desired_joint_trajectory_velocity_not_encoder_velocity",
+        "viscous_current_a_per_rad_s": null
+      },
+      "notes": [],
+      "quality": {
+        "bench_validated": false,
+        "candidate_usable": true,
+        "hardware_integration_allowed": false,
+        "maximum_relative_run_span_allowed": 0.5,
+        "minimum_run_count_pass": true,
+        "relative_run_span": 0.13186813186813173,
+        "repeatability_pass": true,
+        "source_quality_pass": true,
+        "status": "offline_candidate"
+      },
+      "source_evidence": {
+        "coulomb_current_a_values": [
+          0.02037,
+          0.01785
+        ],
+        "domain": "joint-coordinate motor current; not measured joint torque",
+        "run_count": 2,
+        "sources": [
+          {
+            "coulomb_current_a": 0.02037,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_041051_model.json",
+            "model_sha256": "3f31cf49ab8e57fc15bb604a620ba17cf3f156ff828799ae55646bc4a960ea3c",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_041051.npz",
+            "source_dataset_sha256": "c0e820b6e72885d10e38d4cfba57d63615d4d1a89574f4eb0069e070a8e8d4c5",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          },
+          {
+            "coulomb_current_a": 0.01785,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_041414_model.json",
+            "model_sha256": "18f6bd68e1f6a09f1c218328943284b758716ddd5b74b7cb454df6d29d017dd3",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_041414.npz",
+            "source_dataset_sha256": "fb39cffb8029f874a593c4804bcd8cb8dba8989857255d911ca6c735dd449f67",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          }
+        ]
+      }
+    },
+    "R_Leg_hip_yaw": {
+      "current_model": {
+        "direction_convention": "positive desired URDF-joint velocity produces positive motor-current compensation",
+        "evidence_range_a": [
+          0.026670000000000003,
+          0.028980000000000002
+        ],
+        "law": "gain * Ic * tanh(4 * desired_velocity_rad_s / transition_velocity_rad_s)",
+        "nominal_coulomb_current_a": 0.027825000000000003,
+        "nominal_goal_current_raw": 8,
+        "quantization_error_a": -0.0009450000000000014,
+        "quantized_nominal_current_a": 0.02688,
+        "static_breakaway_current_a": null,
+        "transition_velocity_derivation": "4 * source identification velocity threshold, so tanh argument equals 1 at the source threshold",
+        "transition_velocity_rad_s": 0.06981317007977318,
+        "velocity_source": "low_level_desired_joint_trajectory_velocity_not_encoder_velocity",
+        "viscous_current_a_per_rad_s": null
+      },
+      "notes": [],
+      "quality": {
+        "bench_validated": false,
+        "candidate_usable": true,
+        "hardware_integration_allowed": false,
+        "maximum_relative_run_span_allowed": 0.5,
+        "minimum_run_count_pass": true,
+        "relative_run_span": 0.08301886792452828,
+        "repeatability_pass": true,
+        "source_quality_pass": true,
+        "status": "offline_candidate"
+      },
+      "source_evidence": {
+        "coulomb_current_a_values": [
+          0.028980000000000002,
+          0.026670000000000003
+        ],
+        "domain": "joint-coordinate motor current; not measured joint torque",
+        "run_count": 2,
+        "sources": [
+          {
+            "coulomb_current_a": 0.028980000000000002,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_161755_model.json",
+            "model_sha256": "0f2192759a60e9a0badfb55dfab05a2b02f74e4e2009f9a3578737eb314e9bdf",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_161755.npz",
+            "source_dataset_sha256": "93422350ac9b1047bce9dbb49aee21e92e61fb57dc65a4c721aa35c11595cc80",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          },
+          {
+            "coulomb_current_a": 0.026670000000000003,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_162559_model.json",
+            "model_sha256": "7151f91468c3947c56f856da9dc432b399eb9b5630d1b4d579a0de2e5be8a98c",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_162559.npz",
+            "source_dataset_sha256": "73b5b9b5a9f19f24212a70652ab2482ff1663529ddee6a2d2b1fcb6521695703",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          }
+        ]
+      }
+    },
+    "R_Leg_knee": {
+      "current_model": {
+        "direction_convention": "positive desired URDF-joint velocity produces positive motor-current compensation",
+        "evidence_range_a": [
+          0.08568,
+          0.08673
+        ],
+        "law": "gain * Ic * tanh(4 * desired_velocity_rad_s / transition_velocity_rad_s)",
+        "nominal_coulomb_current_a": 0.086205,
+        "nominal_goal_current_raw": 26,
+        "quantization_error_a": 0.0011550000000000032,
+        "quantized_nominal_current_a": 0.08736000000000001,
+        "static_breakaway_current_a": null,
+        "transition_velocity_derivation": "4 * source identification velocity threshold, so tanh argument equals 1 at the source threshold",
+        "transition_velocity_rad_s": 0.06981317007977318,
+        "velocity_source": "low_level_desired_joint_trajectory_velocity_not_encoder_velocity",
+        "viscous_current_a_per_rad_s": null
+      },
+      "notes": [],
+      "quality": {
+        "bench_validated": false,
+        "candidate_usable": true,
+        "hardware_integration_allowed": false,
+        "maximum_relative_run_span_allowed": 0.5,
+        "minimum_run_count_pass": true,
+        "relative_run_span": 0.012180267965895195,
+        "repeatability_pass": true,
+        "source_quality_pass": true,
+        "status": "offline_candidate"
+      },
+      "source_evidence": {
+        "coulomb_current_a_values": [
+          0.08673,
+          0.08568
+        ],
+        "domain": "joint-coordinate motor current; not measured joint torque",
+        "run_count": 2,
+        "sources": [
+          {
+            "coulomb_current_a": 0.08673,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_024329_model.json",
+            "model_sha256": "f66091c413afddb7160b3014ab50d059e1f96334441a2b3ddda093263579213c",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_024329.npz",
+            "source_dataset_sha256": "b5db919e7506d79c12065cc778530c25e7dced7e3fe1c6015d0c9847dbf489e0",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          },
+          {
+            "coulomb_current_a": 0.08568,
+            "coulomb_quality_pass": true,
+            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_025551_model.json",
+            "model_sha256": "d3a7f6183c0df56d6c67c6ea418f3154d1d6d40f3d15f79767152bbf1a822225",
+            "source_dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_025551.npz",
+            "source_dataset_sha256": "f3648e2fd92254bdc4c58f8f6905b509a14944a147e1119860029da5fd034e11",
+            "velocity_threshold_rad_s": 0.017453292519943295
+          }
+        ]
+      }
+    }
+  },
+  "limitations": [
+    "Delay is phase-equivalent closed-loop response delay, not pure transport latency.",
+    "Effective backlash includes compliance and static-friction hysteresis.",
+    "Coulomb current is not joint torque and must not be converted without calibration.",
+    "Ground-contact load dependence was not measured.",
+    "The model compensates only the repeatable direction-dependent current component measured in suspension.",
+    "Desired trajectory velocity is required; encoder velocity must not drive this feedforward term directly.",
+    "Static breakaway current, Stribeck behavior, and viscous current are not identified by the current dataset.",
+    "Goal Current in Current-based Position Mode is a limit, not an additive friction feedforward input.",
+    "No hardware command path or reinforcement-learning integration is enabled by this artifact."
+  ],
+  "measurement_domain": "rigid-upper-body suspended robot at 50 Hz using encoder/current telemetry",
+  "model_type": "rnd_current_domain_coulomb_compensation_candidate",
+  "pair_asymmetry_diagnostics": {
+    "ankle_pitch": {
+      "available": false,
+      "reason": "Both sides require a quality-gated current candidate."
+    },
+    "ankle_roll": {
+      "available": true,
+      "interpretation": "diagnostic_only_preserve_measured_side_specific_values",
+      "larger_to_smaller_ratio": 6.344827586206895,
+      "left_current_a": 0.19319999999999998,
+      "right_current_a": 0.030450000000000005
+    },
+    "hip_pitch": {
+      "available": true,
+      "interpretation": "diagnostic_only_preserve_measured_side_specific_values",
+      "larger_to_smaller_ratio": 3.0000000000000004,
+      "left_current_a": 0.02436,
+      "right_current_a": 0.07308
+    },
+    "hip_roll": {
+      "available": true,
+      "interpretation": "diagnostic_only_preserve_measured_side_specific_values",
+      "larger_to_smaller_ratio": 3.005494505494505,
+      "left_current_a": 0.057435,
+      "right_current_a": 0.019110000000000002
+    },
+    "hip_yaw": {
+      "available": true,
+      "interpretation": "diagnostic_only_preserve_measured_side_specific_values",
+      "larger_to_smaller_ratio": 1.1572052401746724,
+      "left_current_a": 0.024045000000000004,
+      "right_current_a": 0.027825000000000003
+    },
+    "knee": {
+      "available": true,
+      "interpretation": "diagnostic_only_preserve_measured_side_specific_values",
+      "larger_to_smaller_ratio": 1.3986371379897786,
+      "left_current_a": 0.061635,
+      "right_current_a": 0.086205
+    }
+  },
+  "quality_summary": {
+    "bench_validated_joint_count": 0,
+    "candidate_usable_joint_count": 11,
+    "hardware_integration_ready": false,
+    "joint_count": 12,
+    "unavailable_joints": [
+      "R_Leg_ankle_pitch"
+    ]
+  },
+  "references": [
+    {
+      "title": "ROBOTIS MX-106T/R(2.0) e-Manual",
+      "url": "https://emanual.robotis.com/docs/en/dxl/mx/mx-106-2/",
+      "use": "Operating modes, Goal Current semantics, and 3.36 mA current unit."
+    },
+    {
+      "title": "System identification and force estimation of robotic manipulator",
+      "url": "https://doi.org/10.1007/s11044-024-10017-1",
+      "use": "Smooth Coulomb friction regularization with a hyperbolic tangent."
+    },
+    {
+      "title": "A New Model for Control of Systems with Friction",
+      "url": "https://doi.org/10.1109/9.376053",
+      "use": "Dynamic friction phenomena reserved for future data that can identify presliding state."
+    }
+  ],
+  "schema_version": 1,
+  "smoothing": {
+    "reason": "The source data does not identify presliding stiction. A smooth odd Coulomb term avoids a sign discontinuity and deliberately fades to zero near zero desired velocity.",
+    "source_velocity_threshold_rad_s": 0.017453292519943295,
+    "transition_scale": 4.0,
+    "transition_velocity_rad_s": 0.06981317007977318
+  },
+  "source_baseline": "scripts/tools/config/rnd_real2sim_baseline.json",
+  "source_baseline_sha256": "3ccfa672a9980b096380ed429de7659eb8cad8621bb6ecbde580fcc2288a4c23",
+  "torque_conversion": {
+    "available": false,
+    "current_to_joint_torque_nm_per_a": null,
+    "reason": "No measured current-to-joint-torque calibration or loaded ground-contact identification exists.",
+    "simulator_torque_application_allowed": false
+  }
+}

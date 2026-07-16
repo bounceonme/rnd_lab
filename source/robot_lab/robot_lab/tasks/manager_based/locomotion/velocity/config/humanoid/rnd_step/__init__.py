@@ -28,3 +28,25 @@ gym.register(
         "cusrl_cfg_entry_point": f"{agents.__name__}.cusrl_ppo_cfg:RndStepFlatTrainerCfg",
     },
 )
+
+
+gym.register(
+    id="RNDLab-Isaac-Velocity-Flat-RND-Step-Actuator-v0",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.flat_actuator_env_cfg:RndStepFlatActuatorEnvCfg",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_actuator_ppo_cfg:RndStepFlatActuatorPPORunnerCfg",
+    },
+)
+
+
+gym.register(
+    id="RNDLab-Isaac-Velocity-Flat-RND-Step-Actuator-IMU-v0",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.flat_actuator_imu_env_cfg:RndStepFlatActuatorImuEnvCfg",
+        "rsl_rl_cfg_entry_point": (f"{agents.__name__}.rsl_rl_actuator_imu_ppo_cfg:RndStepFlatActuatorImuPPORunnerCfg"),
+    },
+)

@@ -1,0 +1,281 @@
+{
+  "created_utc": "2026-07-15T15:20:49.754501+00:00",
+  "friction_transition_velocity_rad_s_range": [
+    0.03490658503988659,
+    0.13962634015954636
+  ],
+  "integration_enabled": true,
+  "integration_scope": "RND STEP opt-in actuator task only",
+  "joint_order": [
+    "R_Leg_hip_yaw",
+    "R_Leg_hip_roll",
+    "R_Leg_hip_pitch",
+    "R_Leg_knee",
+    "R_Leg_ankle_pitch",
+    "R_Leg_ankle_roll",
+    "L_Leg_hip_yaw",
+    "L_Leg_hip_roll",
+    "L_Leg_hip_pitch",
+    "L_Leg_knee",
+    "L_Leg_ankle_pitch",
+    "L_Leg_ankle_roll"
+  ],
+  "joints": {
+    "L_Leg_ankle_pitch": {
+      "bootstrap_90pct_torque_per_amp_nm": null,
+      "coulomb_torque_range_nm": [
+        0.0,
+        0.3
+      ],
+      "evidence_status": "unidentified_prior",
+      "measured_coulomb_current_a": null,
+      "measured_coulomb_torque_nm": null,
+      "measured_torque_per_amp_nm": null,
+      "range_method": "operator-approved broad prior from zero through the passing-joint envelope",
+      "source_quality_pass": false,
+      "source_quality_reasons": [
+        "Calibration design condition number exceeds 100.",
+        "Gravity/current calibration R2 is below 0.8.",
+        "Torque constant is too close to the optimizer bounds."
+      ]
+    },
+    "L_Leg_ankle_roll": {
+      "bootstrap_90pct_torque_per_amp_nm": null,
+      "coulomb_torque_range_nm": [
+        0.0,
+        0.3
+      ],
+      "evidence_status": "unidentified_prior",
+      "measured_coulomb_current_a": null,
+      "measured_coulomb_torque_nm": null,
+      "measured_torque_per_amp_nm": null,
+      "range_method": "operator-approved broad prior from zero through the passing-joint envelope",
+      "source_quality_pass": false,
+      "source_quality_reasons": [
+        "Matched gravity torque span is below 0.05 Nm.",
+        "Gravity/current calibration R2 is below 0.8.",
+        "Bootstrap 90% torque-constant interval is wider than 30% of its median.",
+        "Torque constant is too close to the optimizer bounds."
+      ]
+    },
+    "L_Leg_hip_pitch": {
+      "bootstrap_90pct_torque_per_amp_nm": [
+        1.5545339545114534,
+        1.7263690253102317
+      ],
+      "coulomb_torque_range_nm": [
+        0.1420194876952435,
+        0.2366991461587392
+      ],
+      "evidence_status": "measured_quality_pass",
+      "measured_coulomb_current_a": 0.11507999999999999,
+      "measured_coulomb_torque_nm": 0.18935931692699134,
+      "measured_torque_per_amp_nm": 1.6454580893899144,
+      "range_method": "measured torque +/-25%, expanded to contain the Kt bootstrap interval",
+      "source_quality_pass": true,
+      "source_quality_reasons": []
+    },
+    "L_Leg_hip_roll": {
+      "bootstrap_90pct_torque_per_amp_nm": null,
+      "coulomb_torque_range_nm": [
+        0.0,
+        0.3
+      ],
+      "evidence_status": "unidentified_prior",
+      "measured_coulomb_current_a": null,
+      "measured_coulomb_torque_nm": null,
+      "measured_torque_per_amp_nm": null,
+      "range_method": "operator-approved broad prior from zero through the passing-joint envelope",
+      "source_quality_pass": false,
+      "source_quality_reasons": [
+        "Torque constant is too close to the optimizer bounds."
+      ]
+    },
+    "L_Leg_hip_yaw": {
+      "bootstrap_90pct_torque_per_amp_nm": null,
+      "coulomb_torque_range_nm": [
+        0.0,
+        0.3
+      ],
+      "evidence_status": "unidentified_prior",
+      "measured_coulomb_current_a": null,
+      "measured_coulomb_torque_nm": null,
+      "measured_torque_per_amp_nm": null,
+      "range_method": "operator-approved broad prior from zero through the passing-joint envelope",
+      "source_quality_pass": false,
+      "source_quality_reasons": [
+        "Matched gravity torque span is below 0.05 Nm.",
+        "Calibration design condition number exceeds 100.",
+        "Gravity/current calibration R2 is below 0.8.",
+        "Torque constant is too close to the optimizer bounds."
+      ]
+    },
+    "L_Leg_knee": {
+      "bootstrap_90pct_torque_per_amp_nm": [
+        1.5655805010073318,
+        1.7099100063950927
+      ],
+      "coulomb_torque_range_nm": [
+        0.12212162092562179,
+        0.20353603487603633
+      ],
+      "evidence_status": "measured_quality_pass",
+      "measured_coulomb_current_a": 0.09912000000000001,
+      "measured_coulomb_torque_nm": 0.16282882790082906,
+      "measured_torque_per_amp_nm": 1.6427444299922218,
+      "range_method": "measured torque +/-25%, expanded to contain the Kt bootstrap interval",
+      "source_quality_pass": true,
+      "source_quality_reasons": []
+    },
+    "R_Leg_ankle_pitch": {
+      "bootstrap_90pct_torque_per_amp_nm": null,
+      "coulomb_torque_range_nm": [
+        0.0,
+        0.3
+      ],
+      "evidence_status": "unidentified_prior",
+      "measured_coulomb_current_a": null,
+      "measured_coulomb_torque_nm": null,
+      "measured_torque_per_amp_nm": null,
+      "range_method": "operator-approved broad prior from zero through the passing-joint envelope",
+      "source_quality_pass": false,
+      "source_quality_reasons": [
+        "Gravity/current calibration R2 is below 0.8.",
+        "Bootstrap 90% torque-constant interval is wider than 30% of its median."
+      ]
+    },
+    "R_Leg_ankle_roll": {
+      "bootstrap_90pct_torque_per_amp_nm": null,
+      "coulomb_torque_range_nm": [
+        0.0,
+        0.3
+      ],
+      "evidence_status": "unidentified_prior",
+      "measured_coulomb_current_a": null,
+      "measured_coulomb_torque_nm": null,
+      "measured_torque_per_amp_nm": null,
+      "range_method": "operator-approved broad prior from zero through the passing-joint envelope",
+      "source_quality_pass": false,
+      "source_quality_reasons": [
+        "Matched gravity torque span is below 0.05 Nm.",
+        "Calibration design condition number exceeds 100.",
+        "Gravity/current calibration R2 is below 0.8.",
+        "Bootstrap 90% torque-constant interval is wider than 30% of its median."
+      ]
+    },
+    "R_Leg_hip_pitch": {
+      "bootstrap_90pct_torque_per_amp_nm": [
+        2.2076739610621674,
+        2.3309246795435974
+      ],
+      "coulomb_torque_range_nm": [
+        0.1044342479749656,
+        0.17405707995827602
+      ],
+      "evidence_status": "measured_quality_pass",
+      "measured_coulomb_current_a": 0.06132,
+      "measured_coulomb_torque_nm": 0.1392456639666208,
+      "measured_torque_per_amp_nm": 2.2708033914974037,
+      "range_method": "measured torque +/-25%, expanded to contain the Kt bootstrap interval",
+      "source_quality_pass": true,
+      "source_quality_reasons": []
+    },
+    "R_Leg_hip_roll": {
+      "bootstrap_90pct_torque_per_amp_nm": null,
+      "coulomb_torque_range_nm": [
+        0.0,
+        0.3
+      ],
+      "evidence_status": "unidentified_prior",
+      "measured_coulomb_current_a": null,
+      "measured_coulomb_torque_nm": null,
+      "measured_torque_per_amp_nm": null,
+      "range_method": "operator-approved broad prior from zero through the passing-joint envelope",
+      "source_quality_pass": false,
+      "source_quality_reasons": [
+        "Torque constant is too close to the optimizer bounds."
+      ]
+    },
+    "R_Leg_hip_yaw": {
+      "bootstrap_90pct_torque_per_amp_nm": null,
+      "coulomb_torque_range_nm": [
+        0.0,
+        0.3
+      ],
+      "evidence_status": "unidentified_prior",
+      "measured_coulomb_current_a": null,
+      "measured_coulomb_torque_nm": null,
+      "measured_torque_per_amp_nm": null,
+      "range_method": "operator-approved broad prior from zero through the passing-joint envelope",
+      "source_quality_pass": false,
+      "source_quality_reasons": [
+        "Matched gravity torque span is below 0.05 Nm.",
+        "Matched mean-current span is below 0.02 A.",
+        "Calibration design condition number exceeds 100.",
+        "Gravity/current calibration R2 is below 0.8.",
+        "Torque constant is too close to the optimizer bounds."
+      ]
+    },
+    "R_Leg_knee": {
+      "bootstrap_90pct_torque_per_amp_nm": [
+        1.920560067236266,
+        2.2353222071420866
+      ],
+      "coulomb_torque_range_nm": [
+        0.17186861675963908,
+        0.28644769459939845
+      ],
+      "evidence_status": "measured_quality_pass",
+      "measured_coulomb_current_a": 0.10920000000000002,
+      "measured_coulomb_torque_nm": 0.22915815567951878,
+      "measured_torque_per_amp_nm": 2.098517909153102,
+      "range_method": "measured torque +/-25%, expanded to contain the Kt bootstrap interval",
+      "source_quality_pass": true,
+      "source_quality_reasons": []
+    }
+  },
+  "limitations": [
+    "Passing values are effective low-current joint-domain fits, not pure motor constants.",
+    "Quality-rejected joints use an uncertainty prior; zero remains possible and no failed fit value is used.",
+    "The smooth Coulomb term excludes static breakaway and viscous friction to avoid unsupported parameters.",
+    "Mirrored joints share random quantiles while retaining their own measured or prior parameter ranges.",
+    "Motor strength is scaled before reapplying the configured actuator effort limit.",
+    "This training randomization layer has not itself passed hardware trajectory replay."
+  ],
+  "model_type": "rnd_joint_torque_randomization",
+  "motor_strength_scale_range": [
+    0.8,
+    1.25
+  ],
+  "quality_summary": {
+    "measured_joint_count": 4,
+    "measured_joint_names": [
+      "R_Leg_hip_pitch",
+      "R_Leg_knee",
+      "L_Leg_hip_pitch",
+      "L_Leg_knee"
+    ],
+    "unidentified_prior_joint_count": 8,
+    "unidentified_prior_joint_names": [
+      "R_Leg_hip_yaw",
+      "R_Leg_hip_roll",
+      "R_Leg_ankle_pitch",
+      "R_Leg_ankle_roll",
+      "L_Leg_hip_yaw",
+      "L_Leg_hip_roll",
+      "L_Leg_ankle_pitch",
+      "L_Leg_ankle_roll"
+    ]
+  },
+  "sample_per_episode": true,
+  "sample_bilateral_pairs_with_shared_quantile": true,
+  "schema_version": 2,
+  "source_dataset": "logs/rnd_real2sim/all_joints_torque_calibration_01.npz",
+  "source_dataset_sha256": "e817b5cfab50ed417a0dd5f45194c466b46aefb19810d9fdcbd57ee00256dd91",
+  "source_dynamics_trace": "logs/rnd_real2sim/all_joints_torque_calibration_01_torque_friction.npz",
+  "source_dynamics_trace_sha256": "15967c39bb67fdd092241a3f2c5ac03c9a810ee74a1d6499e984fa6e3caeb243",
+  "source_report": "logs/rnd_real2sim/all_joints_torque_calibration_01_all_joint_torque_calibration.json",
+  "source_report_sha256": "b96cf7c49aab567da05b456558b80b35f9e72cc8f9eaa342b04097553cec773c",
+  "static_breakaway_enabled": false,
+  "viscous_friction_enabled": false
+}

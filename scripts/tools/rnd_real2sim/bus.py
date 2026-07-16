@@ -3,14 +3,25 @@
 from __future__ import annotations
 
 import math
+import time
 from collections.abc import Iterable
 from dataclasses import dataclass
 
 from .config import JointCalibration, MappingConfig, Real2SimConfigError
 
 try:
-    from dynamixel_sdk import COMM_SUCCESS, GroupSyncRead, GroupSyncWrite, PacketHandler, PortHandler
+    from dynamixel_sdk import (
+        COMM_RX_CORRUPT,
+        COMM_RX_TIMEOUT,
+        COMM_SUCCESS,
+        GroupSyncRead,
+        GroupSyncWrite,
+        PacketHandler,
+        PortHandler,
+    )
 except ImportError:  # Keep config, dataset, and fitting usable without hardware dependencies.
+    COMM_RX_CORRUPT = -3002
+    COMM_RX_TIMEOUT = -3001
     COMM_SUCCESS = 0
     GroupSyncRead = None
     GroupSyncWrite = None
@@ -109,6 +120,8 @@ class Mx2TelemetryBus:
     VELOCITY_UNIT_RAD_S = 0.229 * 2.0 * math.pi / 60.0
     PWM_UNIT_FRACTION = 0.00113
     VOLTAGE_UNIT_V = 0.1
+    GROUP_READ_MAX_ATTEMPTS = 3
+    GROUP_READ_RETRY_DELAY_S = 0.002
 
     def __init__(self, config: MappingConfig):
         if PortHandler is None or PacketHandler is None or GroupSyncRead is None or GroupSyncWrite is None:
@@ -343,10 +356,21 @@ class Mx2TelemetryBus:
         if self._port_open:
             self._best_effort_torque_off()
 
+    def _group_sync_read(self, reader, context: str) -> None:
+        retryable_results = {COMM_RX_TIMEOUT, COMM_RX_CORRUPT}
+        for attempt in range(1, self.GROUP_READ_MAX_ATTEMPTS + 1):
+            result = reader.txRxPacket()
+            if result == COMM_SUCCESS:
+                if attempt > 1:
+                    print(f"[WARNING] {context} recovered on attempt {attempt}/{self.GROUP_READ_MAX_ATTEMPTS}.")
+                return
+            if result not in retryable_results or attempt == self.GROUP_READ_MAX_ATTEMPTS:
+                raise DynamixelReal2SimError(f"{context} failed: {self.packet.getTxRxResult(result)}")
+            self.port.clearPort()
+            time.sleep(self.GROUP_READ_RETRY_DELAY_S)
+
     def check_hardware_errors(self) -> None:
-        result = self._health_reader.txRxPacket()
-        if result != COMM_SUCCESS:
-            raise DynamixelReal2SimError(f"Hardware Error GroupSyncRead failed: {self.packet.getTxRxResult(result)}")
+        self._group_sync_read(self._health_reader, "Hardware Error GroupSyncRead")
         faults: list[str] = []
         for joint in self.config.joints:
             if not self._health_reader.isAvailable(joint.motor_id, Mx2ControlTable.HARDWARE_ERROR_STATUS, 1):
@@ -359,9 +383,7 @@ class Mx2TelemetryBus:
             raise DynamixelReal2SimError("Dynamixel hardware fault: " + ", ".join(faults))
 
     def read_telemetry(self) -> dict[str, MotorTelemetry]:
-        result = self._telemetry_reader.txRxPacket()
-        if result != COMM_SUCCESS:
-            raise DynamixelReal2SimError(f"Telemetry GroupSyncRead failed: {self.packet.getTxRxResult(result)}")
+        self._group_sync_read(self._telemetry_reader, "Telemetry GroupSyncRead")
 
         telemetry: dict[str, MotorTelemetry] = {}
         for joint in self.config.joints:

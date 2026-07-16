@@ -10,10 +10,55 @@ import isaaclab.utils.math as math_utils
 from isaaclab.assets import Articulation, RigidObject
 from isaaclab.managers import SceneEntityCfg
 
+from robot_lab.actuators.rnd_armature_randomization import (
+    load_rnd_armature_randomization,
+    sample_rnd_armatures,
+)
+
 from .utils import is_env_assigned_to_terrain
 
 if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedEnv
+
+
+def randomize_rnd_joint_armature(
+    env: ManagerBasedEnv,
+    env_ids: torch.Tensor | None,
+    asset_cfg: SceneEntityCfg,
+    model_path: str,
+    sample_randomization: bool = True,
+    seed_offset: int = 0,
+):
+    """Apply evidence-gated armature samples once when the environments start."""
+
+    asset = env.scene[asset_cfg.name]
+    if not isinstance(asset, Articulation):
+        raise TypeError("RND joint armature randomization requires an articulation asset.")
+
+    if env_ids is None:
+        resolved_env_ids = torch.arange(env.scene.num_envs, dtype=torch.long, device=asset.device)
+    else:
+        resolved_env_ids = env_ids.to(device=asset.device, dtype=torch.long).flatten()
+
+    if asset_cfg.joint_ids == slice(None):
+        joint_ids: list[int] | slice = slice(None)
+        joint_names = tuple(asset.joint_names)
+    else:
+        joint_ids = [int(index) for index in asset_cfg.joint_ids]
+        joint_names = tuple(asset.joint_names[index] for index in joint_ids)
+
+    model = load_rnd_armature_randomization(model_path, joint_names)
+    env_seed = getattr(env.cfg, "seed", 0)
+    seed = (0 if env_seed is None else int(env_seed)) + int(seed_offset)
+    armature = sample_rnd_armatures(
+        model,
+        joint_names,
+        resolved_env_ids.numel(),
+        asset.device,
+        seed=seed,
+        sample_randomization=sample_randomization,
+    )
+    asset.write_joint_armature_to_sim(armature, joint_ids=joint_ids, env_ids=resolved_env_ids)
 
 
 def randomize_rigid_body_inertia(

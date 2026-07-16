@@ -19,12 +19,14 @@ public fork scope.
 
 | Robot | Terrain | Environment ID | Status |
 | --- | --- | --- | --- |
-| RND STEP humanoid, non-4bar | Flat plane | `RNDLab-Isaac-Velocity-Flat-RND-Step-v0` | Primary development target |
+| RND STEP humanoid, non-4bar | Flat plane | `RNDLab-Isaac-Velocity-Flat-RND-Step-Actuator-v0` | Current sim-to-real training target |
+| RND STEP humanoid, non-4bar | Flat plane | `RNDLab-Isaac-Velocity-Flat-RND-Step-v0` | Implicit-actuator baseline |
 | RND STEP humanoid, non-4bar | Rough terrain | `RNDLab-Isaac-Velocity-Rough-RND-Step-v0` | Base config, lower priority |
 
-The flat environment is the main sim-to-real development path. It keeps the
-play-time randomization events enabled so that trained policies can be checked
-under the same disturbance/randomization classes used during training.
+The opt-in Flat actuator environment is the current sim-to-real development
+path. The baseline Flat task remains available for A/B comparison. Both keep
+play-time randomization events enabled so trained policies can be checked under
+the same disturbance/randomization classes used during training.
 
 ## Fork Changes
 
@@ -33,6 +35,10 @@ Compared with upstream `robot_lab`, this fork focuses on:
 - RND STEP non-4bar robot integration with STEP URDF/CSV metadata.
 - Fixed waist joint modeling for the current STEP hardware assumption.
 - STEP-specific actuator/action configuration and joint defaults.
+- Replay-validated, per-joint equivalent actuator models for all 12 leg joints,
+  including residual delay and stateful generalized-play behavior.
+- Startup-only joint-armature randomization for the actuator task: three
+  quality-passing measured ranges and nine explicitly marked training priors.
 - Flat-environment randomization for friction, mass, COM, reset state, external
   force/torque, and push events.
 - Stable walking rewards that penalize upper-body tilt, upper-body vibration,
@@ -76,11 +82,11 @@ python scripts/tools/list_envs.py | grep RND-Step
 
 ## Training And Play
 
-Train the primary flat RND STEP policy with RSL-RL:
+Train the current actuator-aware flat RND STEP policy with RSL-RL:
 
 ```bash
 python scripts/reinforcement_learning/rsl_rl/train.py \
-  --task=RNDLab-Isaac-Velocity-Flat-RND-Step-v0 \
+  --task=RNDLab-Isaac-Velocity-Flat-RND-Step-Actuator-v0 \
   --headless
 ```
 
@@ -88,7 +94,7 @@ Play a trained policy:
 
 ```bash
 python scripts/reinforcement_learning/rsl_rl/play.py \
-  --task=RNDLab-Isaac-Velocity-Flat-RND-Step-v0 \
+  --task=RNDLab-Isaac-Velocity-Flat-RND-Step-Actuator-v0 \
   --num_envs 32
 ```
 
@@ -96,12 +102,14 @@ Play with keyboard command control:
 
 ```bash
 python scripts/reinforcement_learning/rsl_rl/play.py \
-  --task=RNDLab-Isaac-Velocity-Flat-RND-Step-v0 \
+  --task=RNDLab-Isaac-Velocity-Flat-RND-Step-Actuator-v0 \
   --num_envs 1 \
   --keyboard
 ```
 
-CusRL configs are also kept for the STEP tasks:
+Use `RNDLab-Isaac-Velocity-Flat-RND-Step-v0` instead when an
+implicit-actuator baseline is required. CusRL configs are retained for that
+baseline task:
 
 ```bash
 python scripts/reinforcement_learning/cusrl/train.py \
@@ -116,9 +124,12 @@ The maintained files for this fork are concentrated in these paths:
 ```text
 source/robot_lab/data/Robots/rnd/step/
 source/robot_lab/robot_lab/assets/rnd.py
+source/robot_lab/robot_lab/assets/rnd_actuator.py
+source/robot_lab/robot_lab/actuators/
 source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/humanoid/rnd_step/
 source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/mdp/rewards.py
 scripts/reinforcement_learning/rsl_rl/play.py
+scripts/tools/rnd_real2sim/
 scripts/reinforcement_learning/cusrl/play.py
 scripts/reinforcement_learning/rsl_rl/play_cs.py
 ```
@@ -130,6 +141,21 @@ The flat STEP environment is intentionally split into small files:
 - `flat_behavior_cfg.py`: stable walking rewards, command ranges, and
   terminations.
 - `offline_ground_plane.py`: optional offline ground-plane patch.
+
+## Current Sim-to-Real Boundary
+
+The promoted runtime model currently integrates all 12 leg joints at 200 Hz
+simulation physics and a 50 Hz policy rate. It was validated by replaying
+suspended, rigid-upper-body hardware traces in fixed-base Isaac simulation.
+That validation covers the encoder-domain command response; it does not yet
+cover ground-contact load dependence or measured friction torque.
+
+`play.py` exports JIT and ONNX policies, but a real-time hardware inference
+runner for CMP10A IMU input and Dynamixel command/telemetry is not yet included.
+The simulator actuator transform must not be applied again on real hardware.
+Initial policy deployment must therefore use a safety fixture and progress from
+pose hold to standing, weight shift, stepping, and low-speed walking while
+recording synchronized actuator and IMU telemetry.
 
 ## Attribution
 

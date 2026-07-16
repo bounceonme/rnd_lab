@@ -1,0 +1,243 @@
+{
+  "assumed_simulation_envelopes": {
+    "evidence_status": "assumed_not_measured",
+    "gyro_sample_age_delay": {
+      "range_s": [
+        0.0,
+        0.005
+      ]
+    },
+    "gyro_white_noise": {
+      "distribution": "zero_mean_gaussian",
+      "sigma_range_rad_s": [
+        0.0003,
+        0.003
+      ]
+    },
+    "orientation_delay": {
+      "range_s": [
+        0.0,
+        0.02
+      ]
+    },
+    "projected_gravity_tangent_angle_noise": {
+      "distribution": "zero_mean_tangent_plane_gaussian",
+      "sigma_range_rad": [
+        5e-05,
+        0.002
+      ]
+    },
+    "residual_gyro_episode_bias": {
+      "distribution": "uniform",
+      "frame": "sensor",
+      "range_rad_s_per_axis": [
+        -0.01,
+        0.01
+      ],
+      "sampling_scope": "per_episode_per_sensor_axis"
+    }
+  },
+  "created_utc": "2026-07-15T19:50:15.499486+00:00",
+  "gyro_bias_rad_s": [
+    -0.00010480185609776325,
+    -0.0005094166169815332,
+    7.031010598963865e-05
+  ],
+  "integration_enabled": true,
+  "limitations": [
+    "Absolute sensor-to-host transport latency remains unmeasured.",
+    "No level offset is estimated or corrected by this model.",
+    "Dynamic gain ratios describe Euler-derived angular velocity versus gyro only; they are not static gravity gains.",
+    "Simulation envelopes are explicit assumptions and are not claimed as measured confidence intervals."
+  ],
+  "measured": {
+    "dynamic_consistency": {
+      "axis_results": {
+        "x": {
+          "correlation": 0.9969777127347824,
+          "euler_derived_angular_velocity_to_gyro_gain_ratio": 0.9413184026977318,
+          "relative_orientation_to_gyro_delay_ms": -5.0001369999996825,
+          "stage": "dynamic_axis_x"
+        },
+        "y": {
+          "correlation": 0.99766808288547,
+          "euler_derived_angular_velocity_to_gyro_gain_ratio": 0.9420725493982783,
+          "relative_orientation_to_gyro_delay_ms": 10.000193999999851,
+          "stage": "dynamic_axis_y"
+        },
+        "z": {
+          "correlation": 0.9951588019939214,
+          "euler_derived_angular_velocity_to_gyro_gain_ratio": 1.007452844828143,
+          "relative_orientation_to_gyro_delay_ms": 9.99993199999949,
+          "stage": "dynamic_axis_z"
+        }
+      },
+      "delay_definition": "Positive delay_ms means Euler-derived ZYX body angular velocity lags gyro angular velocity.",
+      "gain_scope": "Euler-derived body angular velocity divided by gyro angular velocity",
+      "median_relative_orientation_to_gyro_delay_ms": 9.99993199999949,
+      "static_gravity_gain_measured": false
+    },
+    "held_baseline": {
+      "discard_initial_s": 1.0,
+      "euler": {
+        "rate_hz": 200.8009072377277,
+        "samples": 803,
+        "std_rad": [
+          0.00021981419900484112,
+          0.000407468754338021,
+          0.00013526299693944198
+        ],
+        "unwrapped_before_std": true
+      },
+      "gyro": {
+        "mean_rad_s": [
+          -0.00010480185609776325,
+          -0.0005094166169815332,
+          7.031010598963865e-05
+        ],
+        "rate_hz": 200.8006417830874,
+        "samples": 803,
+        "std_rad_s": [
+          0.0014574496391202708,
+          0.002595317743444557,
+          0.0007649076106342686
+        ]
+      },
+      "stage": "dynamic_baseline",
+      "standard_deviation_definition": "sample standard deviation (ddof=1)",
+      "statistics_frame": "sensor"
+    },
+    "mount_fit_evidence": {
+      "applied_at_runtime": false,
+      "axis_fit_error_deg": [
+        5.090836673499426,
+        4.740620298672189,
+        4.466612484722035
+      ],
+      "determinant": 1.0000000000000007,
+      "reason": "Manual rotation trials contained cross-axis error; the aligned-mount signed mapping is used at runtime and the full fit is retained only as evidence.",
+      "sensor_to_base_fitted_matrix": [
+        [
+          -0.9994803293045144,
+          0.018282800678348518,
+          0.02654826797921162
+        ],
+        [
+          -0.01921387753514041,
+          -0.9991938004449711,
+          -0.03525019237394072
+        ],
+        [
+          0.025882392536334346,
+          -0.035741969051675836,
+          0.999025832201002
+        ]
+      ],
+      "source_direction_condition_number": 1.1993833355222125
+    },
+    "packet_rates": {
+      "gyro_rate_hz": 200.9936362436779,
+      "orientation_rate_hz": 200.97696979791795,
+      "orientation_source": "euler_angle",
+      "source": "static_report.runtime_gate"
+    }
+  },
+  "model_type": "rnd_cmp10a_policy_observation",
+  "policy_angular_velocity_scale": 0.25,
+  "policy_hz": 50.0,
+  "policy_observation": {
+    "angular_velocity_scale": 0.25,
+    "angular_velocity_units": "rad/s before policy scaling",
+    "policy_hz": 50.0,
+    "projected_gravity_representation": "unit vector in base_link"
+  },
+  "provenance_chain": {
+    "dynamic_dataset_identification_report_sha256": "6c8f95e3052c9eb6ef1ee19afd50bc5563a05009debabf2d3db8e3a5a74e5317",
+    "dynamic_report_identification_report_sha256": "6c8f95e3052c9eb6ef1ee19afd50bc5563a05009debabf2d3db8e3a5a74e5317"
+  },
+  "quality_gates": {
+    "dynamic_communication_gate_pass": true,
+    "dynamic_consistency_gate_pass": true,
+    "promotion_pass": true,
+    "static_mount_axis_gate_pass": true,
+    "static_runtime_gate_pass": true
+  },
+  "runtime": {
+    "max_frame_age_ms": 30.0,
+    "max_pair_skew_ms": 20.0
+  },
+  "runtime_limits": {
+    "maximum_gyro_orientation_pair_skew_s": 0.02,
+    "maximum_sample_age_s": 0.03
+  },
+  "runtime_transform": {
+    "alignment_basis": "user_confirmed_sensor_aligned",
+    "sensor_to_base_matrix": [
+      [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "source": "dynamic_report.source.sensor_to_base_signed_mapping",
+    "source_frame": "sensor",
+    "target_frame": "base_link"
+  },
+  "schema_version": 1,
+  "sensor_baudrate": 921600,
+  "sensor_rates_hz": {
+    "euler": 200.97696979791795,
+    "gyro": 200.9936362436779
+  },
+  "sensor_to_base_matrix": [
+    [
+      -1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      -1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "source_dynamic_dataset": "logs/rnd_imu/rnd_cmp10a_dynamic_20260716_042138.npz",
+  "source_dynamic_dataset_sha256": "22000017005a43331bcf304f11bcf0d0c116a87d5d5784f8e8d0a79b61f9928c",
+  "source_dynamic_report": "logs/rnd_imu/rnd_cmp10a_dynamic_20260716_042138_report.json",
+  "source_dynamic_report_sha256": "f83b1414172d685e523a08c135a57e340c060e12a379d404d8925821ecdf7867",
+  "source_static_report": "logs/rnd_imu/rnd_cmp10a_20260716_035739_report.json",
+  "source_static_report_sha256": "6c8f95e3052c9eb6ef1ee19afd50bc5563a05009debabf2d3db8e3a5a74e5317",
+  "stress_only_provenance": {
+    "applied_to_runtime_model": false,
+    "evidence_status": "legacy_stress_only_not_measurement",
+    "gyro_component_range_rad_s": [
+      -0.2,
+      0.2
+    ],
+    "projected_gravity_component_range": [
+      -0.05,
+      0.05
+    ]
+  },
+  "unmeasured_quantities": {
+    "absolute_transport_latency_reason": "No synchronized external timing reference was used.",
+    "absolute_transport_latency_s": null,
+    "level_offset_rad": null,
+    "level_offset_reason": "The held baseline was not an externally referenced level calibration."
+  }
+}

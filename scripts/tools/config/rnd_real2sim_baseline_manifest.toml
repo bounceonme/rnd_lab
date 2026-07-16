@@ -129,22 +129,22 @@ coulomb_models = [
 [[joints]]
 name = "L_Leg_ankle_roll"
 target_models = []
+command_path_model = "logs/rnd_real2sim/l_ankle_roll_post_alignment_multiamplitude_model.json"
 coulomb_models = [
-  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_044341_model.json",
-  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_044709_model.json",
-  "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_045311_model.json",
-  "logs/rnd_real2sim/rnd_real2sim_20260713_170340_model.json",
+  "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_01_model.json",
+  "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_02_model.json",
+  "logs/rnd_real2sim/l_ankle_roll_post_alignment_diagnostic_01_model.json",
 ]
 notes = [
-  "A constant play/backlash target is unsupported because the fitted hysteresis changes with excitation amplitude.",
-  "Keep the current-domain Coulomb evidence, but route target dynamics to a future amplitude-dependent model.",
+  "The post-alignment 1.5 deg and 3.0 deg traces require a common linear-plus-play command path.",
+  "Keep the post-replacement current-domain Coulomb evidence, but do not convert it to joint torque.",
 ]
 
 [[diagnostics]]
 joint = "L_Leg_ankle_roll"
-model = "logs/rnd_real2sim/rnd_real2sim_20260713_170340_model.json"
+model = "logs/rnd_real2sim/l_ankle_roll_post_alignment_diagnostic_01_model.json"
 micro_triangle_amplitude_deg = 3.0
-purpose = "Amplitude-dependence check; excluded from the constant-play baseline even though its internal fit passes."
+purpose = "Post-replacement amplitude-dependence check used by the generalized-play command-path fit."
 
 [[exclusions]]
 joint = "R_Leg_hip_pitch"
@@ -175,3 +175,27 @@ joint = "L_Leg_ankle_roll"
 model = "logs/rnd_real2sim/rnd_real2sim_20260713_170340_model.json"
 component = "target"
 reason = "The 3.0 deg triangle fit passes internally but is inconsistent with the 1.5 deg hysteresis, proving amplitude dependence."
+
+[[exclusions]]
+joint = "L_Leg_ankle_roll"
+model = "logs/rnd_real2sim/l_ankle_roll_post_replacement_standard_01_model.json"
+component = "all"
+reason = "Collected after motor replacement but before the final mechanical alignment; superseded by post-alignment runs."
+
+[[exclusions]]
+joint = "L_Leg_ankle_roll"
+model = "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_01_model.json"
+component = "constant_play_target"
+reason = "The 1.5 deg single-play gate fails; this run is retained only inside the validated multi-amplitude fit."
+
+[[exclusions]]
+joint = "L_Leg_ankle_roll"
+model = "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_02_model.json"
+component = "constant_play_target"
+reason = "The 1.5 deg single-play gate fails; this run is retained only inside the validated multi-amplitude fit."
+
+[[exclusions]]
+joint = "L_Leg_ankle_roll"
+model = "logs/rnd_real2sim/l_ankle_roll_post_alignment_diagnostic_01_model.json"
+component = "constant_play_target"
+reason = "The 3.0 deg single-play fit passes only at its own amplitude; use the cross-amplitude command-path artifact."

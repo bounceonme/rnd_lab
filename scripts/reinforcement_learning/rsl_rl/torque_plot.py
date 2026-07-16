@@ -24,7 +24,8 @@ class TorquePlotWindow:
     _PRIMARY_DOCK_TARGET_WINDOW = "Viewport"
     _FALLBACK_DOCK_TARGET_WINDOW = "Property"
     _DOCK_POSITION_RATIO = 0.23
-    _PLOT_LIMIT = 20.0
+    _MIN_PLOT_LIMIT = 1.0
+    _PLOT_HEADROOM = 1.2
     _COMPUTED_COLOR_FACTOR = 0.55
     _ZERO_LINE_COLOR = 0x889E9E9E
     _RMS_LINE_COLOR = 0xFF4040FF
@@ -106,16 +107,32 @@ class TorquePlotWindow:
             return f"{value:.0f}"
         return f"{value:.1f}"
 
+    def _resolve_actuator_effort_limits(self) -> dict[str, float]:
+        """Return the torque-clipping limit configured by each actuator."""
+
+        effort_limits = {}
+        for actuator in self._robot.actuators.values():
+            for actuator_joint_id, joint_name in enumerate(actuator.joint_names):
+                effort_limit = float(actuator.effort_limit[self._env_idx, actuator_joint_id].item())
+                if math.isfinite(effort_limit) and effort_limit > 0.0:
+                    effort_limits[joint_name] = abs(effort_limit)
+        return effort_limits
+
     def _resolve_joints(self):
+        actuator_effort_limits = self._resolve_actuator_effort_limits()
         joint_entry_by_name = {}
         for joint_id, joint_name in enumerate(self._robot.joint_names):
             if joint_name not in self._LEFT_JOINT_ORDER and joint_name not in self._RIGHT_JOINT_ORDER:
                 continue
 
-            effort_limit = float(self._robot.data.joint_effort_limits[self._env_idx, joint_id].item())
-            effort_limit = abs(effort_limit) if math.isfinite(effort_limit) else 1.0
-            effort_limit = max(1.0, effort_limit)
-            plot_limit = self._PLOT_LIMIT
+            effort_limit = actuator_effort_limits.get(joint_name)
+            if effort_limit is None:
+                effort_limit = float(self._robot.data.joint_effort_limits[self._env_idx, joint_id].item())
+                effort_limit = abs(effort_limit) if math.isfinite(effort_limit) and effort_limit != 0.0 else 1.0
+
+            # Explicit actuators use a very large PhysX effort limit to avoid
+            # double-clipping. Plot against the actuator's own clipping limit.
+            plot_limit = max(self._MIN_PLOT_LIMIT, effort_limit * self._PLOT_HEADROOM)
 
             joint_entry_by_name[joint_name] = {
                 "joint_id": joint_id,

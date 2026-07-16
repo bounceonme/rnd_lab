@@ -1,0 +1,1542 @@
+{
+  "analysis_only": true,
+  "application_status": "sim_replay_aggregated_not_integrated",
+  "base_actuator_model": "scripts/tools/config/rnd_actuator_model.json",
+  "base_actuator_model_sha256": "45fb0546795a5ea508d633566597c43b9c0253d125c15d7120730d7cdf16f6b2",
+  "created_utc": "2026-07-14T07:11:49.025921+00:00",
+  "gate_thresholds": {
+    "maximum_phase_normalized_rmse": 0.1,
+    "maximum_reference_delay_error_s": 0.005,
+    "maximum_reference_gain_relative_error": 0.1,
+    "minimum_phase_r2": 0.95
+  },
+  "integration_enabled": false,
+  "joints": {
+    "L_Leg_ankle_pitch": {
+      "command_path_seed_usable": true,
+      "report_count": 2,
+      "reports": [
+        {
+          "controller": {
+            "damping": 1.08,
+            "residual_position_bias_rad": 0.0,
+            "stiffness": 26.25
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_040011.npz",
+          "dataset_sha256": "69c1752717cf95e0d96fefde87727780dfc40cc2def7409a6ba675566592916a",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.04721394394065744,
+              "profile_name": "micro_triangle",
+              "r2": 0.9817765056602406,
+              "rmse_rad": 0.0018106320731319566,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.007041926479156307,
+              "profile_name": "slow_sine",
+              "r2": 0.9996295486474284,
+              "rmse_rad": 0.0011450310724452689,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.0045585606099585105,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.009627767428552775,
+              "normalized_rmse": 0.007754668194699998,
+              "profile_name": "medium_sine",
+              "r2": 0.9995388643693751,
+              "rmse_rad": 0.002617012645961477,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.0045585606099585105,
+          "reference_hardware_delay_s": 0.04851924130082047,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.04396068069086196,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_040011_sim_replay_pd_sweep.json",
+          "report_sha256": "6201de5760249a81c2e0422e2656cd425b17b0efa27568eeed8802440b758477",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_040011_model.json",
+          "target_model_sha256": "84e5d6997c28ae334b4dc9c18734adbd5507a1918aa12ae38ff3adfac2133e79"
+        },
+        {
+          "controller": {
+            "damping": 1.08,
+            "residual_position_bias_rad": 0.0,
+            "stiffness": 26.25
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_040442.npz",
+          "dataset_sha256": "5442a96d0ee3a660a21ed182b7010f03015046f549b3432a17fc077250b8b43b",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.041435324710005265,
+              "profile_name": "micro_triangle",
+              "r2": 0.9837359206267278,
+              "rmse_rad": 0.0017161467852136849,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.006733633395363841,
+              "profile_name": "slow_sine",
+              "r2": 0.9996527276530159,
+              "rmse_rad": 0.0011155605402045552,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.004269893080352825,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.009795023839563039,
+              "normalized_rmse": 0.007417157053376308,
+              "profile_name": "medium_sine",
+              "r2": 0.9995782615915106,
+              "rmse_rad": 0.0025031108125341405,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.004269893080352825,
+          "reference_hardware_delay_s": 0.048230573771214785,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.04396068069086196,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_040442_sim_replay.json",
+          "report_sha256": "e04c063cacc410c20b320b8c3156d15a3c17f642c98743a448f6a84550c19e1e",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_040442_model.json",
+          "target_model_sha256": "ebe7c7572b76937a87269f98c4ca64f6d069e22744a98d0b648843f8c40328f0"
+        }
+      ],
+      "residual_delay_s_range": [
+        0.004269893080352825,
+        0.0045585606099585105
+      ],
+      "residual_position_bias_rad_range": [
+        0.0,
+        0.0
+      ],
+      "selected_controller": {
+        "damping": 1.08,
+        "stiffness": 26.25
+      },
+      "sim_replay_validated": true,
+      "status": "sim_replay_validated_not_enabled"
+    },
+    "L_Leg_ankle_roll": {
+      "command_path_seed_usable": true,
+      "report_count": 3,
+      "reports": [
+        {
+          "controller": {
+            "damping": 1.08,
+            "residual_position_bias_rad": 0.0,
+            "stiffness": 26.25
+          },
+          "dataset": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_01.npz",
+          "dataset_sha256": "7dd419948c6d223cdb831f41919b0031d37ec86ebbf6644d35f55dea531c9eda",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.06357699653290856,
+              "profile_name": "micro_triangle",
+              "r2": 0.9656458817535957,
+              "rmse_rad": 0.0013653624772613532,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.01263470200973374,
+              "profile_name": "slow_sine",
+              "r2": 0.9989047274614344,
+              "rmse_rad": 0.001860613453784799,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.0008092340343761883,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.014048224864254503,
+              "normalized_rmse": 0.0063835855169353285,
+              "profile_name": "medium_sine",
+              "r2": 0.9996987006411752,
+              "rmse_rad": 0.0020661747811096067,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.004716525306678723,
+          "reference_hardware_delay_s": 0.06710445465191128,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.0662952206175351,
+          "report": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_01_multiamplitude_final_sim_replay.json",
+          "report_sha256": "d1a9b24ad4a2137d25be9bc2d4d3cdf1fb352ce1950392b25eac7a0c437bfacb",
+          "target_model": "logs/rnd_real2sim/l_ankle_roll_post_alignment_multiamplitude_model.json",
+          "target_model_sha256": "74202d10b2836a07d04698c67b5fe18b7a6dcbf6aeba1b243417d97d89f8df0d"
+        },
+        {
+          "controller": {
+            "damping": 1.08,
+            "residual_position_bias_rad": 0.0,
+            "stiffness": 26.25
+          },
+          "dataset": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_02.npz",
+          "dataset_sha256": "1b6412a673bd139da7e23d0bbde6ec58ad030449c86859ee18e7b5cf71bc41c2",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.06666698473386501,
+              "profile_name": "micro_triangle",
+              "r2": 0.9609269601049704,
+              "rmse_rad": 0.0014317222327522004,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.012419637458955003,
+              "profile_name": "slow_sine",
+              "r2": 0.9989207790643334,
+              "rmse_rad": 0.0018479940696905564,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.0013364966976031345,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.013735235516613207,
+              "normalized_rmse": 0.006468929192097703,
+              "profile_name": "medium_sine",
+              "r2": 0.9996903925796579,
+              "rmse_rad": 0.002093797963861667,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.004716525306678723,
+          "reference_hardware_delay_s": 0.06763171731513823,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.0662952206175351,
+          "report": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_02_multiamplitude_final_sim_replay.json",
+          "report_sha256": "deec70cd9fd8ab1372866b9835d06020f3f059b3ac6f9766466e9e16ec0ac23b",
+          "target_model": "logs/rnd_real2sim/l_ankle_roll_post_alignment_multiamplitude_model.json",
+          "target_model_sha256": "74202d10b2836a07d04698c67b5fe18b7a6dcbf6aeba1b243417d97d89f8df0d"
+        },
+        {
+          "controller": {
+            "damping": 1.08,
+            "residual_position_bias_rad": 0.0,
+            "stiffness": 26.25
+          },
+          "dataset": "logs/rnd_real2sim/l_ankle_roll_post_alignment_diagnostic_01.npz",
+          "dataset_sha256": "a123cee7d78d29630e2ccd59b96ca0eefeb393651d402ce31309579a93d66dd3",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.017892104391712446,
+              "profile_name": "micro_triangle",
+              "r2": 0.9972781972882008,
+              "rmse_rad": 0.00137230721958656,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.012076021302496227,
+              "profile_name": "slow_sine",
+              "r2": 0.998997430385652,
+              "rmse_rad": 0.001778340928524187,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.0009212667713113798,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.013632100594404978,
+              "normalized_rmse": 0.006329291433035751,
+              "profile_name": "medium_sine",
+              "r2": 0.9997035521936426,
+              "rmse_rad": 0.0020486014178924703,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.004716525306678723,
+          "reference_hardware_delay_s": 0.06721648738884647,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.0662952206175351,
+          "report": "logs/rnd_real2sim/l_ankle_roll_post_alignment_diagnostic_01_multiamplitude_final_sim_replay.json",
+          "report_sha256": "4ab9330b70f4b73fb9f48acde39a11eee8c5b1908182baafe94199d05ab4b050",
+          "target_model": "logs/rnd_real2sim/l_ankle_roll_post_alignment_multiamplitude_model.json",
+          "target_model_sha256": "74202d10b2836a07d04698c67b5fe18b7a6dcbf6aeba1b243417d97d89f8df0d"
+        }
+      ],
+      "residual_delay_s_range": [
+        0.004716525306678723,
+        0.004716525306678723
+      ],
+      "residual_position_bias_rad_range": [
+        0.0,
+        0.0
+      ],
+      "selected_controller": {
+        "damping": 1.08,
+        "stiffness": 26.25
+      },
+      "sim_replay_validated": true,
+      "status": "sim_replay_validated_not_enabled"
+    },
+    "L_Leg_hip_pitch": {
+      "command_path_seed_usable": true,
+      "report_count": 3,
+      "reports": [
+        {
+          "controller": {
+            "damping": 1.4400000000000002,
+            "residual_position_bias_rad": 0.0070512832963191725,
+            "stiffness": 30.0
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_032654.npz",
+          "dataset_sha256": "5c7304676a2b6547f201a9f26d24019885ebe6a76d03348ca9a6e5431e79d9ee",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.02547212937182939,
+              "profile_name": "micro_triangle",
+              "r2": 0.9936715698968575,
+              "rmse_rad": 0.0011331389554047914,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.010707938393197471,
+              "profile_name": "slow_sine",
+              "r2": 0.9991235388809688,
+              "rmse_rad": 0.001741131807940964,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.004363444084084435,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.015086996820185463,
+              "normalized_rmse": 0.00919373427435131,
+              "profile_name": "medium_sine",
+              "r2": 0.9993491023079167,
+              "rmse_rad": 0.0030603535488344,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.004363444084084435,
+          "reference_hardware_delay_s": 0.046834626645995664,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.04247118256191123,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_032654_sim_replay_pd_sweep.json",
+          "report_sha256": "874686b3ebe670edf0460e4e2e0128c397ff0e30a5279b9ee5d7e029d42c303d",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_032654_model.json",
+          "target_model_sha256": "4736c6260bb3911df5fcbe7955b809e6cfe9aa5058168f3917f98f9165313ca4"
+        },
+        {
+          "controller": {
+            "damping": 1.44,
+            "residual_position_bias_rad": 0.0070512832963191725,
+            "stiffness": 30.0
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_033004.npz",
+          "dataset_sha256": "16e4c16c2a1c19ff2691366e286ad6400ffc726a5f0773d2f7d4470d1580ca12",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.02885100924455259,
+              "profile_name": "micro_triangle",
+              "r2": 0.9912948025999223,
+              "rmse_rad": 0.0013277068167676397,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.012818707174765995,
+              "profile_name": "slow_sine",
+              "r2": 0.9987473114288801,
+              "rmse_rad": 0.0020843469563520236,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.004033392397737638,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.01437307528404765,
+              "normalized_rmse": 0.009571180811586696,
+              "profile_name": "medium_sine",
+              "r2": 0.9992935699806971,
+              "rmse_rad": 0.0031859956236707505,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.004033392397737638,
+          "reference_hardware_delay_s": 0.04650457495964887,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.04247118256191123,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_033004_sim_replay.json",
+          "report_sha256": "9320edca1c2a706f055b7ede34d60327ac3498652ce4d9b088f900718c812b2c",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_033004_model.json",
+          "target_model_sha256": "6e690ed0a5e8502085e718dc3aa1cbda6463ae9fae88e88da4cf95251fa041ad"
+        },
+        {
+          "controller": {
+            "damping": 1.44,
+            "residual_position_bias_rad": 0.0070512832963191725,
+            "stiffness": 30.0
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_033742.npz",
+          "dataset_sha256": "1ced1ba09043971ae45e88e507890f1d544c8eee2fb90b6e1fe5e0079a376136",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.02445010187390103,
+              "profile_name": "micro_triangle",
+              "r2": 0.9938222364038842,
+              "rmse_rad": 0.0011251795960923257,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.01384235544598442,
+              "profile_name": "slow_sine",
+              "r2": 0.9985151926119235,
+              "rmse_rad": 0.0022720280825149967,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.004001647521593758,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.014293795445663324,
+              "normalized_rmse": 0.009708811206425418,
+              "profile_name": "medium_sine",
+              "r2": 0.9992729897840305,
+              "rmse_rad": 0.003231809180458793,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.004001647521593758,
+          "reference_hardware_delay_s": 0.04647283008350499,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.04247118256191123,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_033742_sim_replay.json",
+          "report_sha256": "73a01043de4b604aaffff9a92e46eb4eadb3e60b89f3ad83e085426d7a917dbc",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_033742_model.json",
+          "target_model_sha256": "a6c674849e72fda1b3683e056fa912fae858868fce7914360e8f739a45766a75"
+        }
+      ],
+      "residual_delay_s_range": [
+        0.004001647521593758,
+        0.004363444084084435
+      ],
+      "residual_position_bias_rad_range": [
+        0.0070512832963191725,
+        0.0070512832963191725
+      ],
+      "selected_controller": {
+        "damping": 1.44,
+        "stiffness": 30.0
+      },
+      "sim_replay_validated": true,
+      "status": "sim_replay_validated_not_enabled"
+    },
+    "L_Leg_hip_roll": {
+      "command_path_seed_usable": true,
+      "report_count": 2,
+      "reports": [
+        {
+          "controller": {
+            "damping": 1.4400000000000002,
+            "residual_position_bias_rad": 0.0,
+            "stiffness": 30.0
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_042145.npz",
+          "dataset_sha256": "3341c311dbe805d0d831efa4d8dde19d4130f532c95b7d577f4044764ef9f7e7",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.030763603488297625,
+              "profile_name": "micro_triangle",
+              "r2": 0.9903243101365349,
+              "rmse_rad": 0.0013213417480810467,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.008902787701406746,
+              "profile_name": "slow_sine",
+              "r2": 0.999400147737232,
+              "rmse_rad": 0.001433954055721164,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.0036416536039053787,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.018744190319616983,
+              "normalized_rmse": 0.009266544504883584,
+              "profile_name": "medium_sine",
+              "r2": 0.9993317163823531,
+              "rmse_rad": 0.003084590169205574,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.0036416536039053787,
+          "reference_hardware_delay_s": 0.04644211597426607,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.04280046237036069,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_042145_sim_replay_pd_sweep.json",
+          "report_sha256": "d7dc1dd0c96d8072d42e1e3ec10d5c7e3f99a3832f606afab2006bf6a0a053bf",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_042145_model.json",
+          "target_model_sha256": "460d4c9431fbccd5ecf5fe676e8eedd069db0b0519ddb6c0d504a7e666e7035a"
+        },
+        {
+          "controller": {
+            "damping": 1.44,
+            "residual_position_bias_rad": 0.0,
+            "stiffness": 30.0
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_042517.npz",
+          "dataset_sha256": "c605a131ebb7650fdb9f163091d1d3d833aa61dcfd52cfb74d10c10ae55e02d2",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.02909197088743765,
+              "profile_name": "micro_triangle",
+              "r2": 0.9914345430914028,
+              "rmse_rad": 0.0012495426838456166,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.008973911143874809,
+              "profile_name": "slow_sine",
+              "r2": 0.9993920223952828,
+              "rmse_rad": 0.0014454097651241653,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.0034628977037622424,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.019533054662327482,
+              "normalized_rmse": 0.009293573736649833,
+              "profile_name": "medium_sine",
+              "r2": 0.9993288767886348,
+              "rmse_rad": 0.003093587493131813,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.0034628977037622424,
+          "reference_hardware_delay_s": 0.04626336007412293,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.04280046237036069,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_042517_sim_replay.json",
+          "report_sha256": "901d82f3d1a9226cbcbeb814c50d4c0f21795ff82a2b6e303564b9f699d2f78e",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_042517_model.json",
+          "target_model_sha256": "c8f25572c8c35f7ab45ff3be5b3a9caae9d2b0a71c229f0e489f1facd25620a4"
+        }
+      ],
+      "residual_delay_s_range": [
+        0.0034628977037622424,
+        0.0036416536039053787
+      ],
+      "residual_position_bias_rad_range": [
+        0.0,
+        0.0
+      ],
+      "selected_controller": {
+        "damping": 1.44,
+        "stiffness": 30.0
+      },
+      "sim_replay_validated": true,
+      "status": "sim_replay_validated_not_enabled"
+    },
+    "L_Leg_hip_yaw": {
+      "command_path_seed_usable": true,
+      "report_count": 2,
+      "reports": [
+        {
+          "controller": {
+            "damping": 1.08,
+            "residual_position_bias_rad": 0.0,
+            "stiffness": 24.0
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_163408.npz",
+          "dataset_sha256": "07222244167245c166416bbe93263a72e0242e6ec63e26c0d38084ecc8410fea",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.016741854782348208,
+              "profile_name": "micro_triangle",
+              "r2": 0.9970762404506298,
+              "rmse_rad": 0.0007961321912804982,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.00526260525359679,
+              "profile_name": "slow_sine",
+              "r2": 0.9997853607015583,
+              "rmse_rad": 0.0008960736242100306,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.0036305508749919224,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.0056110354273020534,
+              "normalized_rmse": 0.005717798174783294,
+              "profile_name": "medium_sine",
+              "r2": 0.9997422115982662,
+              "rmse_rad": 0.0019734733235531607,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.0036305508749919224,
+          "reference_hardware_delay_s": 0.04280383161071917,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.03917328073572725,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_163408_sim_replay_pd_sweep.json",
+          "report_sha256": "8a39ec6a37a3bc425c683a4aa58028f653ed04aafd1235099bc459510728b975",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_163408_model.json",
+          "target_model_sha256": "a762642f52b0543e0fb73d82c5e141349d0f877171590afcedc56036ef4f51bb"
+        },
+        {
+          "controller": {
+            "damping": 1.08,
+            "residual_position_bias_rad": 0.0,
+            "stiffness": 24.0
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_163642.npz",
+          "dataset_sha256": "5db4d24648611642f158a4a2d5742a205fffbd1307b986d4c654aa5346edbd72",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.018185820193081726,
+              "profile_name": "micro_triangle",
+              "r2": 0.9966035718471848,
+              "rmse_rad": 0.0008647976624320334,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.005121168426817985,
+              "profile_name": "slow_sine",
+              "r2": 0.9997938914080768,
+              "rmse_rad": 0.0008798466855657161,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.0035725448025109505,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.006066573625899984,
+              "normalized_rmse": 0.005629210154695224,
+              "profile_name": "medium_sine",
+              "r2": 0.999750364484588,
+              "rmse_rad": 0.001942897551361477,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.0035725448025109505,
+          "reference_hardware_delay_s": 0.0427458255382382,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.03917328073572725,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_163642_sim_replay.json",
+          "report_sha256": "04864c05085fc330e132f2346884e592e4b62509b9e1dd154286a103518497dc",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_163642_model.json",
+          "target_model_sha256": "3f5d0116d6c59c012607f97bc4efc7ed82cde4d12fc65b8e948812648d7fe753"
+        }
+      ],
+      "residual_delay_s_range": [
+        0.0035725448025109505,
+        0.0036305508749919224
+      ],
+      "residual_position_bias_rad_range": [
+        0.0,
+        0.0
+      ],
+      "selected_controller": {
+        "damping": 1.08,
+        "stiffness": 24.0
+      },
+      "sim_replay_validated": true,
+      "status": "sim_replay_validated_not_enabled"
+    },
+    "L_Leg_knee": {
+      "command_path_seed_usable": true,
+      "report_count": 2,
+      "reports": [
+        {
+          "controller": {
+            "damping": 1.4400000000000002,
+            "residual_position_bias_rad": 0.0,
+            "stiffness": 30.0
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_030845.npz",
+          "dataset_sha256": "c65e255e6cd511aab072b66bac2bed3ca31e253203aadc6d264f8171c7e4e7e2",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.026532963278356213,
+              "profile_name": "micro_triangle",
+              "r2": 0.993566904158155,
+              "rmse_rad": 0.0011396295656108623,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.007627031465352752,
+              "profile_name": "slow_sine",
+              "r2": 0.9995660496588232,
+              "rmse_rad": 0.0012518700118001919,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.003196707767010129,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.010011584702975928,
+              "normalized_rmse": 0.006476051851811418,
+              "profile_name": "medium_sine",
+              "r2": 0.9996740539422438,
+              "rmse_rad": 0.002185510606846588,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.003196707767010129,
+          "reference_hardware_delay_s": 0.04880039225778111,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.04560368449077098,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_030845_sim_replay_pd_sweep.json",
+          "report_sha256": "0740a0c0cbd38281c7a2b840c702f798923e3103d55932e9de01933cdc0f4a5e",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_030845_model.json",
+          "target_model_sha256": "c565674d5e59857e4819447606a4f50737d930d0e4e752dd07907822e72b2329"
+        },
+        {
+          "controller": {
+            "damping": 1.44,
+            "residual_position_bias_rad": 0.0,
+            "stiffness": 30.0
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_031207.npz",
+          "dataset_sha256": "fd61c5d32a559556678b7b09ed919619d828e92155151945ca7f981170ae9a20",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.02469816119063752,
+              "profile_name": "micro_triangle",
+              "r2": 0.9943996418096767,
+              "rmse_rad": 0.00106082213335114,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.006187212302360259,
+              "profile_name": "slow_sine",
+              "r2": 0.999708758186822,
+              "rmse_rad": 0.0010250349986581548,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.0034704450056183625,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.008718105836053895,
+              "normalized_rmse": 0.006131267348010288,
+              "profile_name": "medium_sine",
+              "r2": 0.9997097224887965,
+              "rmse_rad": 0.002059748943475194,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.0034704450056183625,
+          "reference_hardware_delay_s": 0.04907412949638934,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.04560368449077098,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_031207_sim_replay.json",
+          "report_sha256": "d9e440af0ec74009fbb462b37c8a899c53f9b7b74b646247aa3ecb5a7a428cb1",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_031207_model.json",
+          "target_model_sha256": "324cebfcb52776ddf472c1ea60d8b5024b16f38bdefd34382ce5a4e8607faca4"
+        }
+      ],
+      "residual_delay_s_range": [
+        0.003196707767010129,
+        0.0034704450056183625
+      ],
+      "residual_position_bias_rad_range": [
+        0.0,
+        0.0
+      ],
+      "selected_controller": {
+        "damping": 1.44,
+        "stiffness": 30.0
+      },
+      "sim_replay_validated": true,
+      "status": "sim_replay_validated_not_enabled"
+    },
+    "R_Leg_ankle_pitch": {
+      "command_path_seed_usable": true,
+      "report_count": 2,
+      "reports": [
+        {
+          "controller": {
+            "damping": 1.08,
+            "residual_position_bias_rad": 0.0,
+            "stiffness": 26.25
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_034222.npz",
+          "dataset_sha256": "66327e610342b86c1fdc1058180159228e47439c299d98efc539aab2a135f05f",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.024210996398515667,
+              "profile_name": "micro_triangle",
+              "r2": 0.9941108528185115,
+              "rmse_rad": 0.0011141760999267435,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.006043040085085985,
+              "profile_name": "slow_sine",
+              "r2": 0.9997240063684243,
+              "rmse_rad": 0.0010104199056129737,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.0034057760419536967,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.010994577902187648,
+              "normalized_rmse": 0.006245864644012723,
+              "profile_name": "medium_sine",
+              "r2": 0.9996965534536306,
+              "rmse_rad": 0.0021365711099858844,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.0034057760419536967,
+          "reference_hardware_delay_s": 0.042414395491147984,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.03900861944919429,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_034222_sim_replay_pd_sweep.json",
+          "report_sha256": "81c9aa59dda8eece25358a0b8d4c8114eaa319f2cdcb80f554f0743f61a8e40b",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_034222_model.json",
+          "target_model_sha256": "003c18dceb0cb2eef22f95246297b1114ba47efaba1101439873acf8b6f29e04"
+        },
+        {
+          "controller": {
+            "damping": 1.08,
+            "residual_position_bias_rad": 0.0,
+            "stiffness": 26.25
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_035633.npz",
+          "dataset_sha256": "ce6128610761bb0dee12369cc164beff706533cd7562d5aad4ab5965ea83ed04",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.025900864954392627,
+              "profile_name": "micro_triangle",
+              "r2": 0.9936911931198769,
+              "rmse_rad": 0.0011522114476601054,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.006144343931305871,
+              "profile_name": "slow_sine",
+              "r2": 0.9997146536826899,
+              "rmse_rad": 0.0010273583043815585,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.0035117480682775315,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.010506003722300882,
+              "normalized_rmse": 0.006259153993051052,
+              "profile_name": "medium_sine",
+              "r2": 0.9996949600385137,
+              "rmse_rad": 0.0021411171001480362,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.0035117480682775315,
+          "reference_hardware_delay_s": 0.04252036751747182,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.03900861944919429,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_035633_sim_replay.json",
+          "report_sha256": "a1aa07e2e45c6bbfe63bbf36015ca3506eb0c542b3bda4450ec25d50f8645ecb",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_035633_model.json",
+          "target_model_sha256": "418ed0077b8f0074045a9fb7ce6626eccbc32d1d660e695f8147793e1ea5410d"
+        }
+      ],
+      "residual_delay_s_range": [
+        0.0034057760419536967,
+        0.0035117480682775315
+      ],
+      "residual_position_bias_rad_range": [
+        0.0,
+        0.0
+      ],
+      "selected_controller": {
+        "damping": 1.08,
+        "stiffness": 26.25
+      },
+      "sim_replay_validated": true,
+      "status": "sim_replay_validated_not_enabled"
+    },
+    "R_Leg_ankle_roll": {
+      "command_path_seed_usable": true,
+      "report_count": 3,
+      "reports": [
+        {
+          "controller": {
+            "damping": 1.08,
+            "residual_position_bias_rad": 0.0,
+            "stiffness": 21.0
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_043303.npz",
+          "dataset_sha256": "ebb9b1bfd19fc47313253f06e76cb0824bf992b5f3d6191cb1d0c56642964a9c",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.02147568477759598,
+              "profile_name": "micro_triangle",
+              "r2": 0.9953348710866672,
+              "rmse_rad": 0.0009882986356656105,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.005633514918351659,
+              "profile_name": "slow_sine",
+              "r2": 0.9997588863153567,
+              "rmse_rad": 0.0009419456981790263,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": 0.001348589608055617,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.0090557041924555,
+              "normalized_rmse": 0.004707251029634372,
+              "profile_name": "medium_sine",
+              "r2": 0.9998271062252017,
+              "rmse_rad": 0.0016102456794367286,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.0,
+          "reference_hardware_delay_s": 0.04507570511210055,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.04642429472015617,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_043303_sim_replay_pd_sweep.json",
+          "report_sha256": "4f54b8643560d2f642cf5006f276cf078fd70b3f5150f93f2cce141ea8fd7583",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_043303_model.json",
+          "target_model_sha256": "1a86da9a9f0a710d0f71661088c7e6471e573e6cb860bdc6ed53b98151734837"
+        },
+        {
+          "controller": {
+            "damping": 1.08,
+            "residual_position_bias_rad": 0.0,
+            "stiffness": 21.0
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_043558.npz",
+          "dataset_sha256": "4ed32e589486c285cf2ab10109488def7143e11b323190aa9dc13361a3086f94",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.015305267340245223,
+              "profile_name": "micro_triangle",
+              "r2": 0.9976787995285338,
+              "rmse_rad": 0.0007043395816016922,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.0048277947534323545,
+              "profile_name": "slow_sine",
+              "r2": 0.9998204859977255,
+              "rmse_rad": 0.0008146318839582359,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": 0.0010906752424845387,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.009307360957661413,
+              "normalized_rmse": 0.004712492423834854,
+              "profile_name": "medium_sine",
+              "r2": 0.9998268095060222,
+              "rmse_rad": 0.0016120386435919047,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.0,
+          "reference_hardware_delay_s": 0.04533361947767163,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.04642429472015617,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_043558_sim_replay.json",
+          "report_sha256": "195ffb5ad8d717a6834cba7d01f13b6406a57f32085964027cd4a3ee336b36ae",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_043558_model.json",
+          "target_model_sha256": "920a02f219451b16fc6fb331a636a6c5384b6ac08a2c7c3077e0cccdff4fb177"
+        },
+        {
+          "controller": {
+            "damping": 1.08,
+            "residual_position_bias_rad": 0.0,
+            "stiffness": 21.0
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_043905.npz",
+          "dataset_sha256": "a17cc0183dc74afc5b993b844aaf7b7e3fa21f3c168803753e4cac8f2f6d516d",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.01590300565341389,
+              "profile_name": "micro_triangle",
+              "r2": 0.997486959514125,
+              "rmse_rad": 0.0007318471542592092,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.004772496038655028,
+              "profile_name": "slow_sine",
+              "r2": 0.9998247353982335,
+              "rmse_rad": 0.0008053008956912855,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": 0.0011304021513738882,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.009134387305883741,
+              "normalized_rmse": 0.004677222418969849,
+              "profile_name": "medium_sine",
+              "r2": 0.9998293311213357,
+              "rmse_rad": 0.0015999735608950092,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.0,
+          "reference_hardware_delay_s": 0.04529389256878228,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.04642429472015617,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_043905_sim_replay.json",
+          "report_sha256": "a711e95bb192215f06127a437d1db5dd1c1ccd27933dce375a16d58306a8b03f",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_043905_model.json",
+          "target_model_sha256": "e30f4a59bf5cbb6abbd23f89a48388d7350f99040d2a6d75a00dcf9a3c74f74e"
+        }
+      ],
+      "residual_delay_s_range": [
+        0.0,
+        0.0
+      ],
+      "residual_position_bias_rad_range": [
+        0.0,
+        0.0
+      ],
+      "selected_controller": {
+        "damping": 1.08,
+        "stiffness": 21.0
+      },
+      "sim_replay_validated": true,
+      "status": "sim_replay_validated_not_enabled"
+    },
+    "R_Leg_hip_pitch": {
+      "command_path_seed_usable": true,
+      "report_count": 2,
+      "reports": [
+        {
+          "controller": {
+            "damping": 1.4400000000000002,
+            "residual_position_bias_rad": -0.005833049651840388,
+            "stiffness": 30.0
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_031833.npz",
+          "dataset_sha256": "443f13d3ee4efa421c73a9f00bf5b4a284b0398dc8fdad9acf0b538a19a2e805",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.039285227919224515,
+              "profile_name": "micro_triangle",
+              "r2": 0.98496250337253,
+              "rmse_rad": 0.001747620761398172,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.00929322609610645,
+              "profile_name": "slow_sine",
+              "r2": 0.9993513167584531,
+              "rmse_rad": 0.001511096810623906,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.002525338063807739,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.018031832501792373,
+              "normalized_rmse": 0.00791947282023391,
+              "profile_name": "medium_sine",
+              "r2": 0.999505706211071,
+              "rmse_rad": 0.0026726302144126943,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.002525338063807739,
+          "reference_hardware_delay_s": 0.04593570947583553,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.04341037141202779,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_031833_sim_replay_pd_sweep.json",
+          "report_sha256": "61cdbce335fe292abf08dc2170eccf43f0fa3b074d37e7f663d1b96b49f26c69",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_031833_model.json",
+          "target_model_sha256": "3b9b163060a43e17605f0c815f1098ba373f1eedef803fb28368c20ab7359e68"
+        },
+        {
+          "controller": {
+            "damping": 1.44,
+            "residual_position_bias_rad": -0.005833049651840388,
+            "stiffness": 30.0
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_032337.npz",
+          "dataset_sha256": "243bc7e38da3b9eda66dc6ca24c55398b70bd2371b0457866d9f8963993bd7e2",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.04488340630595817,
+              "profile_name": "micro_triangle",
+              "r2": 0.9812960531674935,
+              "rmse_rad": 0.0019278079231097403,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.00862836128614514,
+              "profile_name": "slow_sine",
+              "r2": 0.9994389667444733,
+              "rmse_rad": 0.0014029884870515859,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.0022615197365625575,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.018424098417437185,
+              "normalized_rmse": 0.008020156796210468,
+              "profile_name": "medium_sine",
+              "r2": 0.9994980638633576,
+              "rmse_rad": 0.002694305850626592,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.0022615197365625575,
+          "reference_hardware_delay_s": 0.04567189114859035,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.04341037141202779,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_032337_sim_replay.json",
+          "report_sha256": "a293ad28c67ebd7b3d3d230b6c6944807283a312c08616c2a63d4c6e57f2dd18",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_032337_model.json",
+          "target_model_sha256": "e2da80035154deb0193038bf81eca6c263b5391df2dd9da923eb2ab9baac4fce"
+        }
+      ],
+      "residual_delay_s_range": [
+        0.0022615197365625575,
+        0.002525338063807739
+      ],
+      "residual_position_bias_rad_range": [
+        -0.005833049651840388,
+        -0.005833049651840388
+      ],
+      "selected_controller": {
+        "damping": 1.44,
+        "stiffness": 30.0
+      },
+      "sim_replay_validated": true,
+      "status": "sim_replay_validated_not_enabled"
+    },
+    "R_Leg_hip_roll": {
+      "command_path_seed_usable": true,
+      "report_count": 2,
+      "reports": [
+        {
+          "controller": {
+            "damping": 1.4400000000000002,
+            "residual_position_bias_rad": 0.00450275377814902,
+            "stiffness": 30.0
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_041051.npz",
+          "dataset_sha256": "c0e820b6e72885d10e38d4cfba57d63615d4d1a89574f4eb0069e070a8e8d4c5",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.026962764823278335,
+              "profile_name": "micro_triangle",
+              "r2": 0.9924871501900165,
+              "rmse_rad": 0.0012408108968156323,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.009837709257315976,
+              "profile_name": "slow_sine",
+              "r2": 0.9992688060622135,
+              "rmse_rad": 0.0015694491277428522,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.0026785717153236174,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.009919539054914238,
+              "normalized_rmse": 0.006596869840459031,
+              "profile_name": "medium_sine",
+              "r2": 0.9996594956556693,
+              "rmse_rad": 0.0021858058646164157,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.0026785717153236174,
+          "reference_hardware_delay_s": 0.0434046634579199,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.04072609174259628,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_041051_sim_replay_pd_sweep.json",
+          "report_sha256": "a2d657a03092a39245c7594354c51edb0bb1e28f6308dad3933e9b31356987d0",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_041051_model.json",
+          "target_model_sha256": "3f31cf49ab8e57fc15bb604a620ba17cf3f156ff828799ae55646bc4a960ea3c"
+        },
+        {
+          "controller": {
+            "damping": 1.44,
+            "residual_position_bias_rad": 0.00450275377814902,
+            "stiffness": 30.0
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_041414.npz",
+          "dataset_sha256": "fb39cffb8029f874a593c4804bcd8cb8dba8989857255d911ca6c735dd449f67",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.023180501412953972,
+              "profile_name": "micro_triangle",
+              "r2": 0.9940187488115232,
+              "rmse_rad": 0.0011023117584518481,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.0090098887570729,
+              "profile_name": "slow_sine",
+              "r2": 0.9993795216794105,
+              "rmse_rad": 0.0014512046067053502,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.0022899574398593317,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.012857861403433939,
+              "normalized_rmse": 0.006710679831084644,
+              "profile_name": "medium_sine",
+              "r2": 0.9996464674410358,
+              "rmse_rad": 0.002233809703794204,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.0022899574398593317,
+          "reference_hardware_delay_s": 0.043016049182455614,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.04072609174259628,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_041414_sim_replay.json",
+          "report_sha256": "7d6b4adec9bc80fd430158cfe5776bfd68401e16ce15fa88b6306a2c7285bd80",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_041414_model.json",
+          "target_model_sha256": "18f6bd68e1f6a09f1c218328943284b758716ddd5b74b7cb454df6d29d017dd3"
+        }
+      ],
+      "residual_delay_s_range": [
+        0.0022899574398593317,
+        0.0026785717153236174
+      ],
+      "residual_position_bias_rad_range": [
+        0.00450275377814902,
+        0.00450275377814902
+      ],
+      "selected_controller": {
+        "damping": 1.44,
+        "stiffness": 30.0
+      },
+      "sim_replay_validated": true,
+      "status": "sim_replay_validated_not_enabled"
+    },
+    "R_Leg_hip_yaw": {
+      "command_path_seed_usable": true,
+      "report_count": 2,
+      "reports": [
+        {
+          "controller": {
+            "damping": 1.08,
+            "residual_position_bias_rad": 0.0,
+            "stiffness": 24.0
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_161755.npz",
+          "dataset_sha256": "93422350ac9b1047bce9dbb49aee21e92e61fb57dc65a4c721aa35c11595cc80",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.017716579387169473,
+              "profile_name": "micro_triangle",
+              "r2": 0.9967277143497559,
+              "rmse_rad": 0.0008424836646160309,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.006065712577269783,
+              "profile_name": "slow_sine",
+              "r2": 0.9997141648292897,
+              "rmse_rad": 0.0010328202079788642,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.0037767288696183843,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.008182877412171656,
+              "normalized_rmse": 0.006315904862594742,
+              "profile_name": "medium_sine",
+              "r2": 0.9996890604425359,
+              "rmse_rad": 0.002170218784682779,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.0037767288696183843,
+          "reference_hardware_delay_s": 0.044549724304547164,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.04077299543492878,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_161755_sim_replay_pd_sweep.json",
+          "report_sha256": "185842829bc866890a37ed7ab2af8336e5aa9ea7eb116b86969658837129cf22",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_161755_model.json",
+          "target_model_sha256": "0f2192759a60e9a0badfb55dfab05a2b02f74e4e2009f9a3578737eb314e9bdf"
+        },
+        {
+          "controller": {
+            "damping": 1.08,
+            "residual_position_bias_rad": 0.0,
+            "stiffness": 24.0
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_162559.npz",
+          "dataset_sha256": "73b5b9b5a9f19f24212a70652ab2482ff1663529ddee6a2d2b1fcb6521695703",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.018075792615317148,
+              "profile_name": "micro_triangle",
+              "r2": 0.9966406093022363,
+              "rmse_rad": 0.0008595654765287512,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.006190548869975946,
+              "profile_name": "slow_sine",
+              "r2": 0.9997025044796476,
+              "rmse_rad": 0.0010540763166641397,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": -0.0034199216231721383,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.008326732116599098,
+              "normalized_rmse": 0.006537266111577611,
+              "profile_name": "medium_sine",
+              "r2": 0.9996640100737813,
+              "rmse_rad": 0.002256309139602583,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.0034199216231721383,
+          "reference_hardware_delay_s": 0.04419291705810092,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.04077299543492878,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_162559_sim_replay.json",
+          "report_sha256": "7fced4df1180c2e79f27c46a59a398a703d9c5217c59b39b2a9a2b5e5d9db625",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_162559_model.json",
+          "target_model_sha256": "7151f91468c3947c56f856da9dc432b399eb9b5630d1b4d579a0de2e5be8a98c"
+        }
+      ],
+      "residual_delay_s_range": [
+        0.0034199216231721383,
+        0.0037767288696183843
+      ],
+      "residual_position_bias_rad_range": [
+        0.0,
+        0.0
+      ],
+      "selected_controller": {
+        "damping": 1.08,
+        "stiffness": 24.0
+      },
+      "sim_replay_validated": true,
+      "status": "sim_replay_validated_not_enabled"
+    },
+    "R_Leg_knee": {
+      "command_path_seed_usable": true,
+      "report_count": 2,
+      "reports": [
+        {
+          "controller": {
+            "damping": 1.44,
+            "residual_position_bias_rad": 0.0,
+            "stiffness": 24.0
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_024329.npz",
+          "dataset_sha256": "b5db919e7506d79c12065cc778530c25e7dced7e3fe1c6015d0c9847dbf489e0",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.069695193545311,
+              "profile_name": "micro_triangle",
+              "r2": 0.9556457451750048,
+              "rmse_rad": 0.002993510461381395,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.02461207762848495,
+              "profile_name": "slow_sine",
+              "r2": 0.9954967195750972,
+              "rmse_rad": 0.003964217694364821,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": 0.0028960184904833486,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.015208005332935242,
+              "normalized_rmse": 0.010962663979358174,
+              "profile_name": "medium_sine",
+              "r2": 0.9990770338559891,
+              "rmse_rad": 0.0036660004723871433,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.0,
+          "reference_hardware_delay_s": 0.05353599457080381,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.05643201306128716,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_024329_sim_replay.json",
+          "report_sha256": "5275ecbc09b7111b798244fcc573e4a8a897ffba4d17ab5c0bf1021169af7729",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_024329_model.json",
+          "target_model_sha256": "f66091c413afddb7160b3014ab50d059e1f96334441a2b3ddda093263579213c"
+        },
+        {
+          "controller": {
+            "damping": 1.44,
+            "residual_position_bias_rad": 0.0,
+            "stiffness": 24.0
+          },
+          "dataset": "logs/rnd_real2sim/rnd_real2sim_20260713_025551.npz",
+          "dataset_sha256": "f3648e2fd92254bdc4c58f8f6905b509a14944a147e1119860029da5fd034e11",
+          "phases": [
+            {
+              "frequency_hz": 0.1,
+              "normalized_rmse": 0.07312102849097736,
+              "profile_name": "micro_triangle",
+              "r2": 0.9507652904531847,
+              "rmse_rad": 0.00314065508107674,
+              "sample_count": 3000
+            },
+            {
+              "frequency_hz": 0.2,
+              "normalized_rmse": 0.024853354292360328,
+              "profile_name": "slow_sine",
+              "r2": 0.9953412484661454,
+              "rmse_rad": 0.004041204207893563,
+              "sample_count": 1000
+            },
+            {
+              "delay_error_s": 0.0029109276532311296,
+              "frequency_hz": 0.5,
+              "gain_relative_error": 0.015088597700291721,
+              "normalized_rmse": 0.011034719372164053,
+              "profile_name": "medium_sine",
+              "r2": 0.9990646340223046,
+              "rmse_rad": 0.003690096358620798,
+              "sample_count": 500
+            }
+          ],
+          "recommended_residual_delay_s": 0.0,
+          "reference_hardware_delay_s": 0.05352108540805603,
+          "reference_profile": "medium_sine",
+          "reference_simulation_delay_s": 0.05643201306128716,
+          "report": "logs/rnd_real2sim/rnd_real2sim_20260713_025551_sim_replay.json",
+          "report_sha256": "1ba30231d4b832cee300dd30315cd6e57f3d861d78a7177c6dc59b829fd4ef09",
+          "target_model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_025551_model.json",
+          "target_model_sha256": "d3a7f6183c0df56d6c67c6ea418f3154d1d6d40f3d15f79767152bbf1a822225"
+        }
+      ],
+      "residual_delay_s_range": [
+        0.0,
+        0.0
+      ],
+      "residual_position_bias_rad_range": [
+        0.0,
+        0.0
+      ],
+      "selected_controller": {
+        "damping": 1.44,
+        "stiffness": 24.0
+      },
+      "sim_replay_validated": true,
+      "status": "sim_replay_validated_not_enabled"
+    }
+  },
+  "limitations": [
+    "All replays are fixed-base, suspended-reference-pose validations; ground-contact dependence is unknown.",
+    "Residual delay is phase-equivalent closed-loop delay, not pure communication latency.",
+    "A repeated fixed position bias validates that candidate but does not estimate a bias uncertainty range.",
+    "Replay reports record the actuator-model path but not its content hash; the current base-model hash is retained.",
+    "Current-domain friction evidence is not converted to joint torque.",
+    "This summary does not enable the actuator model or modify reinforcement-learning configuration."
+  ],
+  "manifest": "scripts/tools/config/rnd_real2sim_baseline_manifest.toml",
+  "manifest_sha256": "8034373657d9568bb45fde5ddba4b2842022379d131390d8d10aae440308edb2",
+  "quality_summary": {
+    "accepted_target_dataset_count": 27,
+    "discovered_report_count": 31,
+    "integration_ready": false,
+    "joint_count": 12,
+    "passed_selected_report_count": 27,
+    "selected_report_count": 27,
+    "sim_replay_validated_joint_count": 12,
+    "sim_replay_validated_joints": [
+      "R_Leg_hip_yaw",
+      "R_Leg_hip_roll",
+      "R_Leg_hip_pitch",
+      "R_Leg_knee",
+      "R_Leg_ankle_pitch",
+      "R_Leg_ankle_roll",
+      "L_Leg_hip_yaw",
+      "L_Leg_hip_roll",
+      "L_Leg_hip_pitch",
+      "L_Leg_knee",
+      "L_Leg_ankle_pitch",
+      "L_Leg_ankle_roll"
+    ],
+    "unresolved_joints": [],
+    "unselected_report_count": 4
+  },
+  "report_directory": "logs/rnd_real2sim",
+  "schema_version": 1,
+  "unselected_reports": [
+    {
+      "dataset": "logs/rnd_real2sim/l_ankle_roll_post_alignment_diagnostic_01.npz",
+      "joint": "L_Leg_ankle_roll",
+      "reason": "superseded_by_command_path_selected_report",
+      "report": "logs/rnd_real2sim/l_ankle_roll_post_alignment_diagnostic_01_multiamplitude_kp26p25_kd1p08_sim_replay.json",
+      "report_sha256": "fdda8018a4612b7313b3befd738a3ee24071f7776c617c552ca04a3e88321163",
+      "sim_replay_gate_satisfied": true
+    },
+    {
+      "dataset": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_01.npz",
+      "joint": "L_Leg_ankle_roll",
+      "reason": "superseded_by_command_path_selected_report",
+      "report": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_01_multiamplitude_kp26p25_kd1p08_sim_replay.json",
+      "report_sha256": "e04a5dc7667bf8851efbd8bb785d19dd4f3a38242d7c0c88fd5c3f105993813d",
+      "sim_replay_gate_satisfied": true
+    },
+    {
+      "dataset": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_01.npz",
+      "joint": "L_Leg_ankle_roll",
+      "reason": "superseded_by_command_path_selected_report",
+      "report": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_01_multiamplitude_sim_replay.json",
+      "report_sha256": "423b2061ac378094f9c11b90087d1fbacb8bcf402b8516a2e33691c273253d04",
+      "sim_replay_gate_satisfied": false
+    },
+    {
+      "dataset": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_02.npz",
+      "joint": "L_Leg_ankle_roll",
+      "reason": "superseded_by_command_path_selected_report",
+      "report": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_02_multiamplitude_kp26p25_kd1p08_sim_replay.json",
+      "report_sha256": "7291d8b8330842ae6c5295045359baea436f4b2aed8b420ea74d699df936a67c",
+      "sim_replay_gate_satisfied": false
+    }
+  ]
+}

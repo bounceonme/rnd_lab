@@ -36,9 +36,12 @@ class UniformThresholdVelocityCommand(mdp.UniformVelocityCommand):
             cfg: The configuration of the command generator.
             env: The environment.
         """
+        if not 0.0 <= cfg.rel_pure_yaw_envs <= 1.0:
+            raise ValueError("rel_pure_yaw_envs must be within [0.0, 1.0].")
         super().__init__(cfg, env)
         # Track which robots were on pit terrain in the previous step
         self.was_on_pit = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
+        self.is_pure_yaw_env = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
         self.vel_command_target_b = torch.zeros_like(self.vel_command_b)
         self.command_ramp_rates = (
             torch.tensor(cfg.command_ramp_rates, device=self.device).unsqueeze(0)
@@ -56,11 +59,17 @@ class UniformThresholdVelocityCommand(mdp.UniformVelocityCommand):
             self.heading_target[env_ids] = r.uniform_(*self.cfg.ranges.heading)
             self.is_heading_env[env_ids] = r.uniform_(0.0, 1.0) <= self.cfg.rel_heading_envs
         self.is_standing_env[env_ids] = r.uniform_(0.0, 1.0) <= self.cfg.rel_standing_envs
+        self.is_pure_yaw_env[env_ids] = torch.logical_and(
+            r.uniform_(0.0, 1.0) <= self.cfg.rel_pure_yaw_envs,
+            ~self.is_standing_env[env_ids],
+        )
         # set small commands to zero
         threshold = getattr(self.cfg, "zero_velocity_threshold", 0.2)
         self.vel_command_target_b[env_ids, :2] *= (
             torch.norm(self.vel_command_target_b[env_ids, :2], dim=1) > threshold
         ).unsqueeze(1)
+        # Preserve yaw while removing translation so policies see explicit in-place turns.
+        self.vel_command_target_b[env_ids, :2] *= (~self.is_pure_yaw_env[env_ids]).unsqueeze(1)
 
     def _resample_command(self, env_ids: Sequence[int]):
         """Resample target velocity commands with threshold."""
@@ -144,6 +153,8 @@ class UniformThresholdVelocityCommandCfg(mdp.UniformVelocityCommandCfg):
 
     class_type: type = UniformThresholdVelocityCommand
     zero_velocity_threshold: float = 0.2
+    rel_pure_yaw_envs: float = 0.0
+    """Fraction of non-standing environments commanded to rotate without translation."""
     heading_offset: float = 0.0
     command_ramp_rates: tuple[float, float, float] | None = None
 

@@ -42,6 +42,9 @@ class RndStepFlatPPORunnerCfg(RndStepRoughPPORunnerCfg):
 
     def __post_init__(self):
         super().__post_init__()
-        self.clip_actions = 1.0
+        # Keep PPO's sampled actions and the actions seen by the environment identical.
+        # Hard-clipping the Gaussian samples here lets entropy grow behind the clip and
+        # caused saturated, high-frequency actions in the flat-walking policy.
+        self.clip_actions = None
         self.max_iterations = 4500
         self.experiment_name = "rnd_step/flat"

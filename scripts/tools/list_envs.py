@@ -60,7 +60,8 @@ def main():
     index = 0
     # acquire all Isaac environments names
     for task_spec in gym.registry.values():
-        if "RobotLab" in task_spec.id and (args_cli.keyword is None or args_cli.keyword in task_spec.id):
+        is_robot_lab_task = task_spec.id.startswith(("RobotLab-", "RNDLab-"))
+        if is_robot_lab_task and (args_cli.keyword is None or args_cli.keyword in task_spec.id):
             # wrap long text in each column before adding it to the table
             task_name = textwrap.fill(task_spec.id, max_width)
             entry_point = textwrap.fill(task_spec.entry_point, max_width)

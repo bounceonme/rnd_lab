@@ -30,6 +30,18 @@ parser.add_argument("--task", type=str, default=None, help="Name of the task.")
 parser.add_argument(
     "--agent", type=str, default="rsl_rl_cfg_entry_point", help="Name of the RL agent configuration entry point."
 )
+parser.add_argument(
+    "--allow_task_mismatch",
+    action="store_true",
+    default=False,
+    help="Allow loading a checkpoint whose saved experiment does not match the selected task.",
+)
+parser.add_argument(
+    "--enable_observation_corruption",
+    action="store_true",
+    default=False,
+    help="Enable policy observation noise and randomized sensor models during play.",
+)
 parser.add_argument("--seed", type=int, default=None, help="Seed used for the environment")
 parser.add_argument(
     "--use_pretrained_checkpoint",
@@ -49,6 +61,13 @@ parser.add_argument(
     type=int,
     default=1,
     help="Update interval in simulation steps for the torque monitor window.",
+)
+parser.add_argument("--gait_log", type=str, default=None, help="Save one environment's post-step gait telemetry as NPZ.")
+parser.add_argument(
+    "--gait_log_env",
+    type=int,
+    default=0,
+    help="Vectorized environment index recorded by --gait_log.",
 )
 # append RSL-RL cli arguments
 cli_args.add_rsl_rl_args(parser)
@@ -96,6 +115,8 @@ from isaaclab_tasks.utils import get_checkpoint_path
 from isaaclab_tasks.utils.hydra import hydra_task_config
 
 import robot_lab.tasks  # noqa: F401  # isort: skip
+from gait_telemetry import GaitTelemetryLogger  # isort: skip
+from play_checkpoint_guard import validate_checkpoint_experiment  # isort: skip
 from torque_plot import TorquePlotWindow  # isort: skip
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -211,8 +232,14 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
         env_cfg.scene.terrain.terrain_generator.num_cols = 5
         env_cfg.scene.terrain.terrain_generator.curriculum = False
 
-    # Keep environment randomization events enabled so play can inspect sim-to-real disturbances.
-    env_cfg.observations.policy.enable_corruption = False
+    # Environment randomization events stay enabled. Sensor corruption is opt-in so
+    # nominal playback remains deterministic while still supporting sim-to-real checks.
+    env_cfg.observations.policy.enable_corruption = args_cli.enable_observation_corruption
+    for term_name in ("base_ang_vel", "projected_gravity"):
+        term_cfg = getattr(env_cfg.observations.policy, term_name, None)
+        term_params = getattr(term_cfg, "params", None)
+        if isinstance(term_params, dict) and "sample_randomization" in term_params:
+            term_params["sample_randomization"] = args_cli.enable_observation_corruption
     env_cfg.curriculum.command_levels_lin_vel = None
     env_cfg.curriculum.command_levels_ang_vel = None
 
@@ -251,6 +278,14 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
 
     log_dir = os.path.dirname(resume_path)
 
+    validate_checkpoint_experiment(
+        resume_path,
+        agent_cfg.experiment_name,
+        allow_task_mismatch=args_cli.allow_task_mismatch,
+    )
+    if args_cli.allow_task_mismatch:
+        print("[WARN] Checkpoint/task experiment validation was explicitly disabled by --allow_task_mismatch.")
+
     # set the log directory for the environment (works for all environment types)
     env_cfg.log_dir = log_dir
 
@@ -274,6 +309,19 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
         env = gym.wrappers.RecordVideo(env, **video_kwargs)
 
     sim_env = env.unwrapped
+    gait_logger = None
+    if args_cli.gait_log is not None:
+        gait_logger = GaitTelemetryLogger(
+            sim_env,
+            task=task_name,
+            checkpoint=resume_path,
+            env_index=args_cli.gait_log_env,
+            step_dt=sim_env.step_dt,
+        )
+        print(
+            f"[INFO] Recording gait telemetry for env[{args_cli.gait_log_env}] "
+            f"to: {os.path.abspath(os.path.expanduser(args_cli.gait_log))}"
+        )
 
     # wrap around environment for rsl-rl
     env = RslRlVecEnvWrapper(env, clip_actions=agent_cfg.clip_actions)
@@ -340,6 +388,8 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
             actions = policy(obs)
             # env stepping
             obs, _, dones, _ = env.step(actions)
+            if gait_logger is not None:
+                gait_logger.record(actions, dones)
             # reset recurrent states for episodes that have terminated
             policy_nn.reset(dones)
             if torque_plot is not None:
@@ -361,6 +411,9 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     # close the simulator
     if torque_plot is not None:
         torque_plot.close()
+    if gait_logger is not None:
+        gait_log_path = gait_logger.save(args_cli.gait_log)
+        print(f"[INFO] Saved {gait_logger.num_steps} gait telemetry steps to: {gait_log_path}")
     env.close()
 
 

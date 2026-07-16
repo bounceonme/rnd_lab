@@ -1,0 +1,78 @@
+# Dynamic residual-inertia experiment for all 12 suspended RND STEP leg joints.
+# Omit --joint to excite every joint sequentially in one collection run.
+# All profiles use the same amplitude so frequency-squared acceleration scaling
+# separates residual armature from gravity and approximately velocity-dependent friction.
+
+[experiment]
+sample_hz = 50.0
+initial_settle_s = 3.0
+inter_profile_settle_s = 1.0
+return_duration_s = 2.0
+
+[reference_pose]
+move_speed_deg_s = 8.0
+settle_s = 3.0
+tolerance_deg = 1.5
+max_start_deviation_deg = 75.0
+max_tracking_error_deg = 5.0
+max_current_a = 1.0
+max_pwm_fraction = 0.50
+
+[reference_pose.positions_deg]
+R_Leg_hip_yaw = 0.0
+R_Leg_hip_roll = 5.729578
+R_Leg_hip_pitch = -36.096341
+R_Leg_knee = 8.594367
+R_Leg_ankle_pitch = -52.139159
+R_Leg_ankle_roll = -5.729578
+L_Leg_hip_yaw = 0.0
+L_Leg_hip_roll = -5.729578
+L_Leg_hip_pitch = 36.096341
+L_Leg_knee = -8.594367
+L_Leg_ankle_pitch = 52.139159
+L_Leg_ankle_roll = 5.729578
+
+[safety]
+# A 5 deg, 1.5 Hz sine sampled at 50 Hz changes by at most about 0.94 deg/sample.
+max_goal_step_deg = 1.0
+max_excursion_deg = 5.0
+position_limit_margin_deg = 2.0
+max_tracking_error_deg = 8.0
+max_current_a = 1.5
+max_pwm_fraction = 0.70
+max_temperature_c = 55.0
+min_voltage_v = 10.5
+max_voltage_v = 14.5
+max_consecutive_deadline_misses = 20
+
+[identification]
+max_delay_ms = 150.0
+motion_threshold_deg = 0.18
+velocity_threshold_deg_s = 1.0
+backlash_velocity_threshold_deg_s = 0.10
+min_reversal_events = 2
+validation_fraction = 0.25
+nominal_torque_per_amp_nm = 1.615
+randomization_margin = 0.25
+
+# Ten recorded seconds per frequency keeps all three regressors equally weighted.
+[[profiles]]
+name = "armature_sine_0p5hz"
+waveform = "sine"
+amplitude_deg = 5.0
+frequency_hz = 0.5
+cycles = 5
+
+[[profiles]]
+name = "armature_sine_1p0hz"
+waveform = "sine"
+amplitude_deg = 5.0
+frequency_hz = 1.0
+cycles = 10
+
+[[profiles]]
+name = "armature_sine_1p5hz"
+waveform = "sine"
+amplitude_deg = 5.0
+frequency_hz = 1.5
+cycles = 15

@@ -1,0 +1,26 @@
+[serial]
+# "auto" accepts exactly one /dev/serial/by-id, ttyUSB, or ttyACM device.
+port = "auto"
+# The product page lists 921600 baud, while older firmware defaults to 9600.
+# Probe candidates are read-only and are tried in this order.
+baud_candidates = [921600, 115200, 230400, 460800, 57600, 38400, 19200, 9600, 4800]
+read_timeout_s = 0.05
+probe_duration_s = 1.5
+minimum_valid_probe_frames = 5
+
+[experiment]
+policy_hz = 50.0
+static_duration_s = 60.0
+axis_duration_s = 4.0
+countdown_s = 3
+gravity_mps2 = 9.80665
+minimum_axis_rotation_rad = 0.15
+minimum_axis_dominance_ratio = 2.0
+maximum_axis_fit_error_deg = 10.0
+
+[quality]
+# Each required packet type should arrive at least this fast for a 50 Hz policy.
+minimum_required_rate_hz = 50.0
+maximum_checksum_error_fraction = 0.001
+maximum_static_gyro_std_rad_s = 0.05
+maximum_static_accel_norm_error_mps2 = 0.50

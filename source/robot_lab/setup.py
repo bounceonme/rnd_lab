@@ -20,6 +20,7 @@ INSTALL_REQUIRES = [
     "colorama",
     "xacrodoc",
     "dynamixel-sdk>=4.0.5",
+    "pyserial>=3.5",
     # amp
     "numpy",
     "pandas",

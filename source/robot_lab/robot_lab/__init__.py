@@ -5,8 +5,12 @@
 Python module serving as a project/extension template.
 """
 
-# Register Gym environments.
-from .tasks import *
+import importlib.util
 
-# Register UI extensions.
-from .ui_extension_example import *
+
+# Isaac Sim exposes pxr only after its Python runtime is initialized. Keeping
+# registration behind that boundary lets pure hardware modules run on the robot
+# without importing the simulator stack.
+if importlib.util.find_spec("pxr") is not None:
+    from .tasks import *  # noqa: F401, F403
+    from .ui_extension_example import *  # noqa: F401, F403

@@ -3,8 +3,11 @@
 
 from __future__ import annotations
 
-import torch
+import math
+from collections.abc import Sequence
 from typing import TYPE_CHECKING
+
+import torch
 
 import isaaclab.utils.math as math_utils
 from isaaclab.assets import Articulation, RigidObject
@@ -61,6 +64,28 @@ def track_lin_vel_xy_yaw_frame_exp(
     reward = torch.exp(-lin_vel_error / std**2)
     reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
     return reward
+
+
+def lin_vel_xy_underspeed_l2(
+    env: ManagerBasedRLEnv,
+    command_name: str,
+    command_threshold: float = 0.1,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """Penalize only the planar velocity deficit along the commanded direction."""
+    asset: RigidObject = env.scene[asset_cfg.name]
+    command_xy = env.command_manager.get_command(command_name)[:, :2]
+    command_speed = torch.linalg.vector_norm(command_xy, dim=1)
+    command_direction = command_xy / command_speed.unsqueeze(1).clamp_min(command_threshold)
+
+    vel_yaw = quat_apply_inverse(yaw_quat(asset.data.root_quat_w), asset.data.root_lin_vel_w[:, :3])
+    achieved_along_command = torch.sum(vel_yaw[:, :2] * command_direction, dim=1)
+    underspeed = torch.clamp(command_speed - achieved_along_command, min=0.0)
+
+    penalty = torch.square(underspeed)
+    penalty *= command_speed > command_threshold
+    penalty *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+    return penalty
 
 
 def track_ang_vel_z_world_exp(
@@ -154,6 +179,22 @@ def stand_still(
     reward *= torch.norm(env.command_manager.get_command(command_name), dim=1) < command_threshold
     reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
     return reward
+
+
+def base_planar_motion_l2_without_cmd(
+    env: ManagerBasedRLEnv,
+    command_name: str,
+    command_threshold: float = 0.08,
+    yaw_weight: float = 1.0,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """Penalize planar translation and yaw motion while the velocity command is zero."""
+    asset: Articulation = env.scene[asset_cfg.name]
+    motion = torch.sum(torch.square(asset.data.root_lin_vel_b[:, :2]), dim=1)
+    motion += yaw_weight * torch.square(asset.data.root_ang_vel_b[:, 2])
+    motion *= torch.linalg.norm(env.command_manager.get_command(command_name), dim=1) < command_threshold
+    motion *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+    return motion
 
 
 def _straight_yaw_command_gate(
@@ -454,9 +495,13 @@ def signed_joint_pair_l2_straight_yaw_command(
 
 
 def feet_air_time(
-    env: ManagerBasedRLEnv, command_name: str, sensor_cfg: SceneEntityCfg, threshold: float
+    env: ManagerBasedRLEnv,
+    command_name: str,
+    sensor_cfg: SceneEntityCfg,
+    threshold: float,
+    max_time: float = 0.5,
 ) -> torch.Tensor:
-    """Reward long steps taken by the feet using L2-kernel.
+    """Reward completed swing phases while penalizing rapid foot taps.
 
     This function rewards the agent for taking steps that are longer than a threshold. This helps ensure
     that the robot lifts its feet off the ground and takes steps. The reward is computed as the sum of
@@ -468,7 +513,7 @@ def feet_air_time(
     contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
     # compute the reward
     first_contact = contact_sensor.compute_first_contact(env.step_dt)[:, sensor_cfg.body_ids]
-    last_air_time = contact_sensor.data.last_air_time[:, sensor_cfg.body_ids]
+    last_air_time = torch.clamp(contact_sensor.data.last_air_time[:, sensor_cfg.body_ids], max=max_time)
     reward = torch.sum((last_air_time - threshold) * first_contact, dim=1)
     # no reward for zero command
     reward *= torch.norm(env.command_manager.get_command(command_name), dim=1) > 0.1
@@ -519,9 +564,11 @@ def feet_air_time_variance_penalty_straight_yaw_command(
     yaw_threshold: float,
     yaw_scale: float,
     sensor_cfg: SceneEntityCfg,
+    command_threshold: float = 0.1,
 ) -> torch.Tensor:
-    """Penalize left/right foot timing variance mainly for straight commands."""
+    """Penalize left/right foot timing variance during commanded walking."""
     reward = feet_air_time_variance_penalty(env, sensor_cfg=sensor_cfg)
+    reward *= torch.linalg.norm(env.command_manager.get_command(command_name), dim=1) > command_threshold
     reward *= _straight_yaw_command_gate(env, command_name, yaw_threshold, yaw_scale)
     return reward
 
@@ -570,6 +617,17 @@ def biped_gait_phase_l2_straight_yaw_command(
     return reward
 
 
+def _bounded_biped_phase_duration_l2(
+    contact_time: torch.Tensor,
+    air_time: torch.Tensor,
+    max_time: float,
+) -> torch.Tensor:
+    """Return a finite phase-duration penalty for two-foot contact timers."""
+    contact_excess = torch.clamp(contact_time - max_time, min=0.0, max=max_time)
+    air_excess = torch.clamp(air_time - max_time, min=0.0, max=max_time)
+    return torch.sum(torch.square(contact_excess) + torch.square(air_excess), dim=1) / (max_time**2)
+
+
 def biped_phase_duration_l2(
     env: ManagerBasedRLEnv,
     command_name: str,
@@ -585,9 +643,11 @@ def biped_phase_duration_l2(
     if contact_time.shape[1] != 2:
         raise ValueError("biped_phase_duration_l2 expects exactly two foot bodies.")
 
-    contact_excess = torch.clamp(contact_time - max_time, min=0.0)
-    air_excess = torch.clamp(air_time - max_time, min=0.0)
-    reward = torch.sum(torch.square(contact_excess) + torch.square(air_excess), dim=1) / (max_time**2)
+    # Contact timers continue accumulating while an environment has a standing command.  Without
+    # an upper bound, the first walking step after a 10 s standing command can receive a raw penalty
+    # above 1,000 and force an abrupt, consistently one-sided first step.  Keep this safeguard finite
+    # while still penalizing phases that remain longer than ``max_time`` after walking begins.
+    reward = _bounded_biped_phase_duration_l2(contact_time, air_time, max_time)
     reward *= torch.linalg.norm(env.command_manager.get_command(command_name), dim=1) > command_threshold
     reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
     return reward
@@ -622,7 +682,7 @@ def feet_flight_penalty(
     in_contact = contact_sensor.data.current_contact_time[:, sensor_cfg.body_ids] > 0.0
     no_foot_contact = torch.sum(in_contact.int(), dim=1) == 0
     reward = no_foot_contact.float()
-    reward *= torch.linalg.norm(env.command_manager.get_command(command_name)[:, :2], dim=1) > command_threshold
+    reward *= torch.linalg.norm(env.command_manager.get_command(command_name), dim=1) > command_threshold
     reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
     return reward
 
@@ -732,6 +792,26 @@ def feet_min_lateral_distance_x_l2(
     width_deficit = torch.clamp(min_width - lateral_width, min=0.0) / min_width
     reward = torch.square(width_deficit)
     reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+    return reward
+
+
+def feet_min_lateral_distance_x_l2_straight_yaw_command(
+    env: ManagerBasedRLEnv,
+    command_name: str,
+    min_width: float,
+    yaw_threshold: float,
+    yaw_scale: float,
+    lateral_signs: tuple[float, float] | None = None,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """Penalize a narrow nominal stance while releasing the constraint during large turns."""
+    reward = feet_min_lateral_distance_x_l2(
+        env,
+        min_width=min_width,
+        lateral_signs=lateral_signs,
+        asset_cfg=asset_cfg,
+    )
+    reward *= _straight_yaw_command_gate(env, command_name, yaw_threshold, yaw_scale)
     return reward
 
 
@@ -868,9 +948,10 @@ def feet_forward_position_y_l2_straight_yaw_command(
     stance_length: float,
     yaw_threshold: float,
     yaw_scale: float,
+    target_center_y: float = 0.0,
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
 ) -> torch.Tensor:
-    """Penalize fore-aft foot placement bias during straight STEP walking."""
+    """Penalize fore-aft foot-center error relative to the nominal STEP stance."""
     asset: RigidObject = env.scene[asset_cfg.name]
     foot_pos_w = asset.data.body_link_pos_w[:, asset_cfg.body_ids, :] - asset.data.root_link_pos_w[:, :].unsqueeze(1)
     n_feet = len(asset_cfg.body_ids)
@@ -883,12 +964,88 @@ def feet_forward_position_y_l2_straight_yaw_command(
     if n_feet != 2:
         raise ValueError("feet_forward_position_y_l2_straight_yaw_command expects exactly two feet.")
 
-    fore_aft_bias = torch.sum(foot_pos_b[:, :, 1], dim=1) / stance_length
+    fore_aft_bias = torch.sum(foot_pos_b[:, :, 1] - target_center_y, dim=1) / stance_length
     reward = torch.square(fore_aft_bias)
     reward *= _straight_yaw_command_gate(env, command_name, yaw_threshold, yaw_scale)
     reward *= torch.linalg.norm(env.command_manager.get_command(command_name)[:, :2], dim=1) > 0.1
     reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
     return reward
+
+
+def _update_biped_fore_aft_bias_ema(
+    ema: torch.Tensor,
+    normalized_difference: torch.Tensor,
+    active: torch.Tensor,
+    alpha: float,
+) -> torch.Tensor:
+    """Update the gait-cycle bias filter and return a new penalty tensor."""
+    ema[~active] = 0.0
+    ema[active] += alpha * (normalized_difference[active] - ema[active])
+    return torch.square(ema)
+
+
+class BipedFeetForeAftBalanceL2(ManagerTermBase):
+    """Penalize persistent one-foot-leading bias without suppressing alternating strides.
+
+    The instantaneous right-minus-left fore-aft distance is low-pass filtered over multiple
+    steps.  A balanced alternating gait cancels in the filter, whereas keeping the same foot
+    ahead converges to a non-zero penalty.  The filter is cleared outside straight translation
+    so standing and turning cannot leak stale state into the next walking segment.
+    """
+
+    def __init__(self, cfg: RewTerm, env: ManagerBasedRLEnv):
+        super().__init__(cfg, env)
+        asset_cfg: SceneEntityCfg = cfg.params["asset_cfg"]
+        if len(asset_cfg.body_ids) != 2:
+            raise ValueError("BipedFeetForeAftBalanceL2 expects exactly two ordered foot bodies.")
+        if cfg.params["stance_length"] <= 0.0:
+            raise ValueError("stance_length must be positive.")
+        if cfg.params["time_constant"] <= 0.0:
+            raise ValueError("time_constant must be positive.")
+        self._fore_aft_bias_ema = torch.zeros(env.num_envs, device=env.device)
+
+    def reset(self, env_ids: Sequence[int] | torch.Tensor | slice | None = None) -> None:
+        if env_ids is None:
+            env_ids = slice(None)
+        self._fore_aft_bias_ema[env_ids] = 0.0
+
+    def __call__(
+        self,
+        env: ManagerBasedRLEnv,
+        command_name: str,
+        stance_length: float,
+        time_constant: float,
+        yaw_threshold: float,
+        command_threshold: float,
+        asset_cfg: SceneEntityCfg,
+    ) -> torch.Tensor:
+        asset: RigidObject = env.scene[asset_cfg.name]
+        foot_pos_w = asset.data.body_link_pos_w[:, asset_cfg.body_ids, :] - asset.data.root_link_pos_w.unsqueeze(1)
+        foot_pos_yaw = quat_apply_inverse(
+            yaw_quat(asset.data.root_link_quat_w).unsqueeze(1).expand(-1, foot_pos_w.shape[1], -1),
+            foot_pos_w,
+        )
+        normalized_difference = torch.clamp(
+            (foot_pos_yaw[:, 0, 1] - foot_pos_yaw[:, 1, 1]) / stance_length,
+            min=-1.0,
+            max=1.0,
+        )
+
+        command = env.command_manager.get_command(command_name)
+        active = torch.logical_and(
+            torch.linalg.vector_norm(command[:, :2], dim=1) > command_threshold,
+            torch.abs(command[:, 2]) <= yaw_threshold,
+        )
+        alpha = -math.expm1(-float(env.step_dt) / time_constant)
+        reward = _update_biped_fore_aft_bias_ema(
+            self._fore_aft_bias_ema,
+            normalized_difference,
+            active,
+            alpha,
+        )
+        reward *= active.float()
+        reward *= torch.clamp(-asset.data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+        return reward
 
 
 def feet_distance_xy_exp(
@@ -1099,6 +1256,19 @@ def lateral_tilt_x_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneE
     asset: RigidObject = env.scene[asset_cfg.name]
     reward = torch.square(asset.data.projected_gravity_b[:, 0])
     reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+    return reward
+
+
+def lateral_tilt_x_l2_with_cmd(
+    env: ManagerBasedRLEnv,
+    command_name: str,
+    command_threshold: float = 0.1,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """Penalize lateral lean while STEP is commanded to translate."""
+    reward = lateral_tilt_x_l2(env, asset_cfg=asset_cfg)
+    planar_command = env.command_manager.get_command(command_name)[:, :2]
+    reward *= torch.linalg.norm(planar_command, dim=1) > command_threshold
     return reward
 
 

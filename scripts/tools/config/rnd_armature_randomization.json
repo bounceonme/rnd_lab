@@ -1,0 +1,242 @@
+{
+  "correlation_mode": "global_shared_quantile",
+  "failed_repeat_evidence": {
+    "joint_name": "L_Leg_hip_pitch",
+    "source_quality_pass": false,
+    "source_quality_reasons": [
+      "Cycle-harmonic armature fit R2 is below 0.5.",
+      "Reliable-frequency armature estimates differ by more than 50% of their median."
+    ],
+    "used_for_range": false
+  },
+  "failed_repeat_report": "logs/rnd_real2sim/l_hip_pitch_armature_02_all_joint_armature.json",
+  "failed_repeat_report_sha256": "7df3b1df53a3ed3047f145e1faeb203b772a5bf8a435275f0295e5f94d3c9ea5",
+  "integration_enabled": true,
+  "integration_mode": "opt_in_rl_training_randomization",
+  "joint_order": [
+    "R_Leg_hip_yaw",
+    "R_Leg_hip_roll",
+    "R_Leg_hip_pitch",
+    "R_Leg_knee",
+    "R_Leg_ankle_pitch",
+    "R_Leg_ankle_roll",
+    "L_Leg_hip_yaw",
+    "L_Leg_hip_roll",
+    "L_Leg_hip_pitch",
+    "L_Leg_knee",
+    "L_Leg_ankle_pitch",
+    "L_Leg_ankle_roll"
+  ],
+  "joints": {
+    "L_Leg_ankle_pitch": {
+      "armature_range_kg_m2": [
+        0.005,
+        0.04
+      ],
+      "bootstrap_90pct_kg_m2": null,
+      "evidence_status": "unidentified_prior",
+      "measured_armature_kg_m2": null,
+      "range_method": "user-approved unidentified training prior",
+      "source_quality_pass": false,
+      "source_quality_reasons": [
+        "Current-to-torque calibration is not valid, so physical armature cannot be identified: Calibration design condition number exceeds 100. Gravity/current calibration R2 is below 0.8. Torque constant is too close to the optimizer bounds."
+      ]
+    },
+    "L_Leg_ankle_roll": {
+      "armature_range_kg_m2": [
+        0.005,
+        0.04
+      ],
+      "bootstrap_90pct_kg_m2": null,
+      "evidence_status": "unidentified_prior",
+      "measured_armature_kg_m2": null,
+      "range_method": "user-approved unidentified training prior",
+      "source_quality_pass": false,
+      "source_quality_reasons": [
+        "Current-to-torque calibration is not valid, so physical armature cannot be identified: Matched gravity torque span is below 0.05 Nm. Gravity/current calibration R2 is below 0.8. Bootstrap 90% torque-constant interval is wider than 30% of its median. Torque constant is too close to the optimizer bounds."
+      ]
+    },
+    "L_Leg_hip_pitch": {
+      "armature_range_kg_m2": [
+        0.005,
+        0.04
+      ],
+      "bootstrap_90pct_kg_m2": null,
+      "evidence_status": "unidentified_prior",
+      "measured_armature_kg_m2": null,
+      "range_method": "user-approved unidentified training prior",
+      "source_quality_pass": false,
+      "source_quality_reasons": [
+        "Cycle-harmonic armature fit R2 is below 0.5.",
+        "Harmonic bootstrap 90% interval is wider than 50% of its median.",
+        "Reliable-frequency armature estimates differ by more than 50% of their median."
+      ]
+    },
+    "L_Leg_hip_roll": {
+      "armature_range_kg_m2": [
+        0.005,
+        0.04
+      ],
+      "bootstrap_90pct_kg_m2": null,
+      "evidence_status": "unidentified_prior",
+      "measured_armature_kg_m2": null,
+      "range_method": "user-approved unidentified training prior",
+      "source_quality_pass": false,
+      "source_quality_reasons": [
+        "Current-to-torque calibration is not valid, so physical armature cannot be identified: Torque constant is too close to the optimizer bounds."
+      ]
+    },
+    "L_Leg_hip_yaw": {
+      "armature_range_kg_m2": [
+        0.005,
+        0.04
+      ],
+      "bootstrap_90pct_kg_m2": null,
+      "evidence_status": "unidentified_prior",
+      "measured_armature_kg_m2": null,
+      "range_method": "user-approved unidentified training prior",
+      "source_quality_pass": false,
+      "source_quality_reasons": [
+        "Current-to-torque calibration is not valid, so physical armature cannot be identified: Matched gravity torque span is below 0.05 Nm. Calibration design condition number exceeds 100. Gravity/current calibration R2 is below 0.8. Torque constant is too close to the optimizer bounds."
+      ]
+    },
+    "L_Leg_knee": {
+      "armature_range_kg_m2": [
+        0.01627245565552772,
+        0.027120759425879534
+      ],
+      "bootstrap_90pct_kg_m2": [
+        0.020186977412028254,
+        0.023055331839257447
+      ],
+      "evidence_status": "measured_quality_pass",
+      "measured_armature_kg_m2": 0.021696607540703627,
+      "range_method": "estimate +/-25%, expanded to contain the bootstrap 90% interval",
+      "source_quality_pass": true,
+      "source_quality_reasons": []
+    },
+    "R_Leg_ankle_pitch": {
+      "armature_range_kg_m2": [
+        0.005,
+        0.04
+      ],
+      "bootstrap_90pct_kg_m2": null,
+      "evidence_status": "unidentified_prior",
+      "measured_armature_kg_m2": null,
+      "range_method": "user-approved unidentified training prior",
+      "source_quality_pass": false,
+      "source_quality_reasons": [
+        "Current-to-torque calibration is not valid, so physical armature cannot be identified: Gravity/current calibration R2 is below 0.8. Bootstrap 90% torque-constant interval is wider than 30% of its median."
+      ]
+    },
+    "R_Leg_ankle_roll": {
+      "armature_range_kg_m2": [
+        0.005,
+        0.04
+      ],
+      "bootstrap_90pct_kg_m2": null,
+      "evidence_status": "unidentified_prior",
+      "measured_armature_kg_m2": null,
+      "range_method": "user-approved unidentified training prior",
+      "source_quality_pass": false,
+      "source_quality_reasons": [
+        "Current-to-torque calibration is not valid, so physical armature cannot be identified: Matched gravity torque span is below 0.05 Nm. Calibration design condition number exceeds 100. Gravity/current calibration R2 is below 0.8. Bootstrap 90% torque-constant interval is wider than 30% of its median."
+      ]
+    },
+    "R_Leg_hip_pitch": {
+      "armature_range_kg_m2": [
+        0.02529998208456699,
+        0.04216663680761165
+      ],
+      "bootstrap_90pct_kg_m2": [
+        0.03126465686935083,
+        0.035768204386168366
+      ],
+      "evidence_status": "measured_quality_pass",
+      "measured_armature_kg_m2": 0.03373330944608932,
+      "range_method": "estimate +/-25%, expanded to contain the bootstrap 90% interval",
+      "source_quality_pass": true,
+      "source_quality_reasons": []
+    },
+    "R_Leg_hip_roll": {
+      "armature_range_kg_m2": [
+        0.005,
+        0.04
+      ],
+      "bootstrap_90pct_kg_m2": null,
+      "evidence_status": "unidentified_prior",
+      "measured_armature_kg_m2": null,
+      "range_method": "user-approved unidentified training prior",
+      "source_quality_pass": false,
+      "source_quality_reasons": [
+        "Current-to-torque calibration is not valid, so physical armature cannot be identified: Torque constant is too close to the optimizer bounds."
+      ]
+    },
+    "R_Leg_hip_yaw": {
+      "armature_range_kg_m2": [
+        0.005,
+        0.04
+      ],
+      "bootstrap_90pct_kg_m2": null,
+      "evidence_status": "unidentified_prior",
+      "measured_armature_kg_m2": null,
+      "range_method": "user-approved unidentified training prior",
+      "source_quality_pass": false,
+      "source_quality_reasons": [
+        "Current-to-torque calibration is not valid, so physical armature cannot be identified: Matched gravity torque span is below 0.05 Nm. Matched mean-current span is below 0.02 A. Calibration design condition number exceeds 100. Gravity/current calibration R2 is below 0.8. Torque constant is too close to the optimizer bounds."
+      ]
+    },
+    "R_Leg_knee": {
+      "armature_range_kg_m2": [
+        0.011807110038759314,
+        0.019678516731265524
+      ],
+      "bootstrap_90pct_kg_m2": [
+        0.0147601113724473,
+        0.017867177987984244
+      ],
+      "evidence_status": "measured_quality_pass",
+      "measured_armature_kg_m2": 0.01574281338501242,
+      "range_method": "estimate +/-25%, expanded to contain the bootstrap 90% interval",
+      "source_quality_pass": true,
+      "source_quality_reasons": []
+    }
+  },
+  "limitations": [
+    "integration_enabled=true enables opt-in RL training randomization only; it does not promote any estimate to a fixed physical armature.",
+    "Only primary-report fits that pass every source quality gate receive measured ranges.",
+    "The failed L hip-pitch repeat remains unidentified evidence and contributes no fit value to its training prior.",
+    "Unidentified joints use the user-approved [0.005, 0.04] kg*m^2 training prior.",
+    "One normalized quantile is shared across all selected joints in each environment to represent common MX-106 uncertainty without artificial left/right asymmetry.",
+    "Armatures are sampled once at environment startup and are not resampled on episode reset."
+  ],
+  "measured_relative_span": 0.25,
+  "model_type": "rnd_joint_armature_randomization",
+  "physical_parameter_promotion": false,
+  "quality_summary": {
+    "measured_joint_count": 3,
+    "measured_joint_names": [
+      "R_Leg_hip_pitch",
+      "R_Leg_knee",
+      "L_Leg_knee"
+    ],
+    "unidentified_prior_joint_count": 9,
+    "unidentified_prior_joint_names": [
+      "R_Leg_hip_yaw",
+      "R_Leg_hip_roll",
+      "R_Leg_ankle_pitch",
+      "R_Leg_ankle_roll",
+      "L_Leg_hip_yaw",
+      "L_Leg_hip_roll",
+      "L_Leg_hip_pitch",
+      "L_Leg_ankle_pitch",
+      "L_Leg_ankle_roll"
+    ]
+  },
+  "sample_bilateral_pairs_with_shared_quantile": true,
+  "sample_on_startup": true,
+  "sample_per_episode": false,
+  "schema_version": 1,
+  "source_report": "logs/rnd_real2sim/all_joints_armature_01_all_joint_armature.json",
+  "source_report_sha256": "11ac19c281d972d1f5c5919d0ff13c25bbfda32b046170bf4f001f5bbd7fca5c"
+}

@@ -1,26 +1,26 @@
 {
   "analysis_only": true,
   "application_status": "not_integrated_with_rl_or_simulation",
-  "created_utc": "2026-07-13T08:18:10.102378+00:00",
+  "created_utc": "2026-07-14T07:11:20.744793+00:00",
   "diagnostics": [
     {
-      "command_delay_s": 0.07805635927346895,
-      "coulomb_current_a": 0.14826,
-      "effective_backlash_rad": 0.03493448118698955,
+      "command_delay_s": 0.06735046279190718,
+      "coulomb_current_a": 0.19383,
+      "effective_backlash_rad": 0.029597980382869434,
       "excluded_from_simple_baseline": true,
       "joint": "L_Leg_ankle_roll",
       "micro_triangle_amplitude_deg": 3.0,
-      "play_model_gain": 0.911737654362624,
-      "play_model_validation_r2": 0.9926823015240233,
+      "play_model_gain": 0.9686606935060913,
+      "play_model_validation_r2": 0.9972346490868754,
       "provenance": {
-        "model": "logs/rnd_real2sim/rnd_real2sim_20260713_170340_model.json",
-        "model_sha256": "3c8b1ea64dd56084de3e3acda7d6829a80b510145183a9119c7d64252ec009aa",
-        "source_dataset": "rnd_real2sim_20260713_170340.npz",
-        "source_dataset_sha256": "a37a04c178d19da02f4cabda7902c9626084a91011b27ed14ab8215938e36dcc",
+        "model": "logs/rnd_real2sim/l_ankle_roll_post_alignment_diagnostic_01_model.json",
+        "model_sha256": "4466f3d759a1b2a50b9afb7be2e45a0c02934055ae1de0f2ee02dbad9ea963e9",
+        "source_dataset": "l_ankle_roll_post_alignment_diagnostic_01.npz",
+        "source_dataset_sha256": "a123cee7d78d29630e2ccd59b96ca0eefeb393651d402ce31309579a93d66dd3",
         "status": "usable_target_and_coulomb"
       },
-      "purpose": "Amplitude-dependence check; excluded from the constant-play baseline even though its internal fit passes.",
-      "reference_sine_gain": 0.9441672678779444
+      "purpose": "Post-replacement amplitude-dependence check used by the generalized-play command-path fit.",
+      "reference_sine_gain": 0.9634739405033279
     }
   ],
   "exclusions": [
@@ -53,10 +53,37 @@
       "joint": "L_Leg_ankle_roll",
       "model": "logs/rnd_real2sim/rnd_real2sim_20260713_170340_model.json",
       "reason": "The 3.0 deg triangle fit passes internally but is inconsistent with the 1.5 deg hysteresis, proving amplitude dependence."
+    },
+    {
+      "component": "all",
+      "joint": "L_Leg_ankle_roll",
+      "model": "logs/rnd_real2sim/l_ankle_roll_post_replacement_standard_01_model.json",
+      "reason": "Collected after motor replacement but before the final mechanical alignment; superseded by post-alignment runs."
+    },
+    {
+      "component": "constant_play_target",
+      "joint": "L_Leg_ankle_roll",
+      "model": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_01_model.json",
+      "reason": "The 1.5 deg single-play gate fails; this run is retained only inside the validated multi-amplitude fit."
+    },
+    {
+      "component": "constant_play_target",
+      "joint": "L_Leg_ankle_roll",
+      "model": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_02_model.json",
+      "reason": "The 1.5 deg single-play gate fails; this run is retained only inside the validated multi-amplitude fit."
+    },
+    {
+      "component": "constant_play_target",
+      "joint": "L_Leg_ankle_roll",
+      "model": "logs/rnd_real2sim/l_ankle_roll_post_alignment_diagnostic_01_model.json",
+      "reason": "The 3.0 deg single-play fit passes only at its own amplitude; use the cross-amplitude command-path artifact."
     }
   ],
   "joints": {
     "L_Leg_ankle_pitch": {
+      "command_path_model": {
+        "usable": false
+      },
       "coulomb_current": {
         "coulomb_current_a": {
           "count": 2,
@@ -91,6 +118,12 @@
           "maximum": 0.04843172926985155,
           "median": 0.04828625587842608,
           "minimum": 0.04814078248700061
+        },
+        "command_minus_position_center_bias_rad": {
+          "count": 2,
+          "maximum": -0.003982268394182489,
+          "median": -0.00398231952687543,
+          "minimum": -0.003982370659568371
         },
         "effective_backlash_rad": {
           "count": 2,
@@ -131,50 +164,208 @@
       }
     },
     "L_Leg_ankle_roll": {
+      "command_path_model": {
+        "amplitudes_deg": [
+          1.5000000000000002,
+          3.0000000000000004
+        ],
+        "amplitudes_rad": [
+          0.026179938779914945,
+          0.05235987755982989
+        ],
+        "command_path": {
+          "linear_weight": 0.1532488737142516,
+          "play_threshold_scale_range": [
+            1.0,
+            1.0
+          ],
+          "play_thresholds_rad": [
+            0.018151424220741025
+          ],
+          "play_weights": [
+            0.8467511262857484
+          ],
+          "residual_delay_s_range": [
+            0.004716525306678723,
+            0.004716525306678723
+          ],
+          "residual_position_bias_rad_range": [
+            0.0,
+            0.0
+          ]
+        },
+        "measured": {
+          "command_delay_s": {
+            "count": 3,
+            "maximum": 0.06771163511741779,
+            "median": 0.06735046279190718,
+            "minimum": 0.06702797899257419
+          },
+          "effective_hysteresis_rad": {
+            "count": 3,
+            "maximum": 0.029597980382869434,
+            "median": 0.013328929839143529,
+            "minimum": 0.013069788045001016
+          },
+          "reference_sine_gain": {
+            "count": 3,
+            "maximum": 0.9639806627564373,
+            "median": 0.9634739405033279,
+            "minimum": 0.9634152501238566
+          }
+        },
+        "model": "logs/rnd_real2sim/l_ankle_roll_post_alignment_multiamplitude_model.json",
+        "model_sha256": "74202d10b2836a07d04698c67b5fe18b7a6dcbf6aeba1b243417d97d89f8df0d",
+        "model_type": "rnd_multi_amplitude_generalized_play",
+        "sim_replay": {
+          "recommended_total_residual_delay_s_range": [
+            0.005525759341054912,
+            0.006053022004281858
+          ],
+          "report_count": 3,
+          "reports": [
+            {
+              "applied_residual_delay_s": 0.004716525306678723,
+              "dataset": "logs/rnd_real2sim/l_ankle_roll_post_alignment_diagnostic_01.npz",
+              "maximum_phase_normalized_rmse": 0.017892104391712446,
+              "minimum_phase_r2": 0.9972781972882008,
+              "recommended_total_residual_delay_s": 0.005637792077990103,
+              "reference_hardware_delay_s": 0.06721648738884647,
+              "reference_simulation_delay_s": 0.0662952206175351,
+              "report": "logs/rnd_real2sim/l_ankle_roll_post_alignment_diagnostic_01_multiamplitude_final_sim_replay.json",
+              "report_sha256": "4ab9330b70f4b73fb9f48acde39a11eee8c5b1908182baafe94199d05ab4b050"
+            },
+            {
+              "applied_residual_delay_s": 0.004716525306678723,
+              "dataset": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_01.npz",
+              "maximum_phase_normalized_rmse": 0.06357699653290856,
+              "minimum_phase_r2": 0.9656458817535957,
+              "recommended_total_residual_delay_s": 0.005525759341054912,
+              "reference_hardware_delay_s": 0.06710445465191128,
+              "reference_simulation_delay_s": 0.0662952206175351,
+              "report": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_01_multiamplitude_final_sim_replay.json",
+              "report_sha256": "d1a9b24ad4a2137d25be9bc2d4d3cdf1fb352ce1950392b25eac7a0c437bfacb"
+            },
+            {
+              "applied_residual_delay_s": 0.004716525306678723,
+              "dataset": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_02.npz",
+              "maximum_phase_normalized_rmse": 0.06666698473386501,
+              "minimum_phase_r2": 0.9609269601049704,
+              "recommended_total_residual_delay_s": 0.006053022004281858,
+              "reference_hardware_delay_s": 0.06763171731513823,
+              "reference_simulation_delay_s": 0.0662952206175351,
+              "report": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_02_multiamplitude_final_sim_replay.json",
+              "report_sha256": "deec70cd9fd8ab1372866b9835d06020f3f059b3ac6f9766466e9e16ec0ac23b"
+            }
+          ],
+          "residual_delay_s_range": [
+            0.004716525306678723,
+            0.004716525306678723
+          ],
+          "residual_position_bias_rad_range": [
+            0.0,
+            0.0
+          ],
+          "selected_controller": {
+            "damping": 1.08,
+            "stiffness": 26.25
+          },
+          "validation_type": "fixed_base_isaac_explicit_pd_replay"
+        },
+        "source_datasets": [
+          {
+            "dataset": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_01.npz",
+            "dataset_sha256": "7dd419948c6d223cdb831f41919b0031d37ec86ebbf6644d35f55dea531c9eda",
+            "delay_compensation_s": 0.06702797899257419,
+            "identification_model": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_01_model.json",
+            "identification_model_sha256": "0177b296d80fcdddb64ac74531d3483c722a3fc217833dbbf91dab905d0e1249",
+            "single_play_quality_pass": false,
+            "single_play_validation_r2": 0.828036289193733,
+            "training_cycle_count": 4,
+            "triangle_amplitude_deg": 1.5000000000000002,
+            "triangle_amplitude_rad": 0.026179938779914945,
+            "triangle_cycle_count": 6,
+            "triangle_phase_id": 0,
+            "validation_cycle_count": 2
+          },
+          {
+            "dataset": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_02.npz",
+            "dataset_sha256": "1b6412a673bd139da7e23d0bbde6ec58ad030449c86859ee18e7b5cf71bc41c2",
+            "delay_compensation_s": 0.06771163511741779,
+            "identification_model": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_02_model.json",
+            "identification_model_sha256": "3ccdfac02be89c61bed634aca1bb4fe91069e579908554448406b0fdb88e1b2b",
+            "single_play_quality_pass": false,
+            "single_play_validation_r2": 0.814219280059931,
+            "training_cycle_count": 4,
+            "triangle_amplitude_deg": 1.5000000000000002,
+            "triangle_amplitude_rad": 0.026179938779914945,
+            "triangle_cycle_count": 6,
+            "triangle_phase_id": 0,
+            "validation_cycle_count": 2
+          },
+          {
+            "dataset": "logs/rnd_real2sim/l_ankle_roll_post_alignment_diagnostic_01.npz",
+            "dataset_sha256": "a123cee7d78d29630e2ccd59b96ca0eefeb393651d402ce31309579a93d66dd3",
+            "delay_compensation_s": 0.06735046279190718,
+            "identification_model": "logs/rnd_real2sim/l_ankle_roll_post_alignment_diagnostic_01_model.json",
+            "identification_model_sha256": "4466f3d759a1b2a50b9afb7be2e45a0c02934055ae1de0f2ee02dbad9ea963e9",
+            "single_play_quality_pass": true,
+            "single_play_validation_r2": 0.9972346490868754,
+            "training_cycle_count": 4,
+            "triangle_amplitude_deg": 3.0000000000000004,
+            "triangle_amplitude_rad": 0.05235987755982989,
+            "triangle_cycle_count": 6,
+            "triangle_phase_id": 0,
+            "validation_cycle_count": 2
+          }
+        ],
+        "usable": true,
+        "validation": {
+          "dataset_count": 3,
+          "maximum_normalized_rmse_allowed": 0.1,
+          "maximum_validation_normalized_rmse": 0.050547188745357206,
+          "minimum_validation_r2": 0.978203885833927,
+          "minimum_validation_r2_required": 0.95,
+          "sim_replay_validated": true
+        }
+      },
       "coulomb_current": {
         "coulomb_current_a": {
-          "count": 4,
-          "maximum": 0.15225,
-          "median": 0.14836500000000002,
-          "minimum": 0.14763
+          "count": 3,
+          "maximum": 0.19383,
+          "median": 0.19319999999999998,
+          "minimum": 0.18207
         },
         "domain": "joint-coordinate motor current; not measured joint torque",
         "provenance": [
           {
-            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_044341_model.json",
-            "model_sha256": "1e0093a9b123dab42c3bc372bbcfb8ce869490ab7bd3ff5ca9f24b061548cee5",
-            "source_dataset": "rnd_real2sim_20260713_044341.npz",
-            "source_dataset_sha256": "3e7506c522881813ec9439a9b02696383561d85bfe03e20d5be2f82b0581d87a",
+            "model": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_01_model.json",
+            "model_sha256": "0177b296d80fcdddb64ac74531d3483c722a3fc217833dbbf91dab905d0e1249",
+            "source_dataset": "l_ankle_roll_post_alignment_standard_01.npz",
+            "source_dataset_sha256": "7dd419948c6d223cdb831f41919b0031d37ec86ebbf6644d35f55dea531c9eda",
             "status": "rejected"
           },
           {
-            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_044709_model.json",
-            "model_sha256": "429b28f7f1472bc11a4fe4149f76f404c5299f3e326f227837bb86c701e57f85",
-            "source_dataset": "rnd_real2sim_20260713_044709.npz",
-            "source_dataset_sha256": "ee815a1e900c3763d6d6c67da2f614996c14dc5363f5a7ebc9c9d2fd4f373a15",
+            "model": "logs/rnd_real2sim/l_ankle_roll_post_alignment_standard_02_model.json",
+            "model_sha256": "3ccdfac02be89c61bed634aca1bb4fe91069e579908554448406b0fdb88e1b2b",
+            "source_dataset": "l_ankle_roll_post_alignment_standard_02.npz",
+            "source_dataset_sha256": "1b6412a673bd139da7e23d0bbde6ec58ad030449c86859ee18e7b5cf71bc41c2",
             "status": "rejected"
           },
           {
-            "model": "logs/rnd_real2sim/fitted/rnd_real2sim_20260713_045311_model.json",
-            "model_sha256": "f419a2efb2fadbb9f60e6c560be00dfbca20bdb1eb600d298de2133f934005fa",
-            "source_dataset": "rnd_real2sim_20260713_045311.npz",
-            "source_dataset_sha256": "542e1bb287a739578ea63424d26377705ee036c5c16105d9ba6a1e5403f9fe68",
-            "status": "rejected"
-          },
-          {
-            "model": "logs/rnd_real2sim/rnd_real2sim_20260713_170340_model.json",
-            "model_sha256": "3c8b1ea64dd56084de3e3acda7d6829a80b510145183a9119c7d64252ec009aa",
-            "source_dataset": "rnd_real2sim_20260713_170340.npz",
-            "source_dataset_sha256": "a37a04c178d19da02f4cabda7902c9626084a91011b27ed14ab8215938e36dcc",
+            "model": "logs/rnd_real2sim/l_ankle_roll_post_alignment_diagnostic_01_model.json",
+            "model_sha256": "4466f3d759a1b2a50b9afb7be2e45a0c02934055ae1de0f2ee02dbad9ea963e9",
+            "source_dataset": "l_ankle_roll_post_alignment_diagnostic_01.npz",
+            "source_dataset_sha256": "a123cee7d78d29630e2ccd59b96ca0eefeb393651d402ce31309579a93d66dd3",
             "status": "usable_target_and_coulomb"
           }
         ],
-        "run_count": 4,
+        "run_count": 3,
         "usable": true
       },
       "notes": [
-        "A constant play/backlash target is unsupported because the fitted hysteresis changes with excitation amplitude.",
-        "Keep the current-domain Coulomb evidence, but route target dynamics to a future amplitude-dependent model."
+        "The post-alignment 1.5 deg and 3.0 deg traces require a common linear-plus-play command path.",
+        "Keep the post-replacement current-domain Coulomb evidence, but do not convert it to joint torque."
       ],
       "target": {
         "run_count": 0,
@@ -182,6 +373,9 @@
       }
     },
     "L_Leg_hip_pitch": {
+      "command_path_model": {
+        "usable": false
+      },
       "coulomb_current": {
         "coulomb_current_a": {
           "count": 3,
@@ -223,6 +417,12 @@
           "maximum": 0.04672193817999159,
           "median": 0.04645292053038847,
           "minimum": 0.04635413203899458
+        },
+        "command_minus_position_center_bias_rad": {
+          "count": 3,
+          "maximum": -0.006348001381444701,
+          "median": -0.006554679726265791,
+          "minimum": -0.007028066197407298
         },
         "effective_backlash_rad": {
           "count": 3,
@@ -270,6 +470,9 @@
       }
     },
     "L_Leg_hip_roll": {
+      "command_path_model": {
+        "usable": false
+      },
       "coulomb_current": {
         "coulomb_current_a": {
           "count": 2,
@@ -304,6 +507,12 @@
           "maximum": 0.046496131174413036,
           "median": 0.046421968409999945,
           "minimum": 0.04634780564558685
+        },
+        "command_minus_position_center_bias_rad": {
+          "count": 2,
+          "maximum": -0.005438061976778893,
+          "median": -0.0055307144163671855,
+          "minimum": -0.005623366855955478
         },
         "effective_backlash_rad": {
           "count": 2,
@@ -344,6 +553,9 @@
       }
     },
     "L_Leg_hip_yaw": {
+      "command_path_model": {
+        "usable": false
+      },
       "coulomb_current": {
         "coulomb_current_a": {
           "count": 2,
@@ -378,6 +590,12 @@
           "maximum": 0.0429051967404017,
           "median": 0.042849421150011974,
           "minimum": 0.04279364555962224
+        },
+        "command_minus_position_center_bias_rad": {
+          "count": 2,
+          "maximum": -0.0003784841930643177,
+          "median": -0.0004651541075798554,
+          "minimum": -0.0005518240220953931
         },
         "effective_backlash_rad": {
           "count": 2,
@@ -418,6 +636,9 @@
       }
     },
     "L_Leg_knee": {
+      "command_path_model": {
+        "usable": false
+      },
       "coulomb_current": {
         "coulomb_current_a": {
           "count": 2,
@@ -452,6 +673,12 @@
           "maximum": 0.04917753247213482,
           "median": 0.04898919397110084,
           "minimum": 0.048800855470066865
+        },
+        "command_minus_position_center_bias_rad": {
+          "count": 2,
+          "maximum": -0.009564264674588763,
+          "median": -0.009570707393897884,
+          "minimum": -0.009577150113207006
         },
         "effective_backlash_rad": {
           "count": 2,
@@ -492,6 +719,9 @@
       }
     },
     "R_Leg_ankle_pitch": {
+      "command_path_model": {
+        "usable": false
+      },
       "coulomb_current": {
         "domain": "joint-coordinate motor current; not measured joint torque",
         "run_count": 0,
@@ -506,6 +736,12 @@
           "maximum": 0.04246797207624,
           "median": 0.042431932296491295,
           "minimum": 0.0423958925167426
+        },
+        "command_minus_position_center_bias_rad": {
+          "count": 2,
+          "maximum": 0.00240942675967043,
+          "median": 0.0023188196277993123,
+          "minimum": 0.0022282124959281946
         },
         "effective_backlash_rad": {
           "count": 2,
@@ -546,6 +782,9 @@
       }
     },
     "R_Leg_ankle_roll": {
+      "command_path_model": {
+        "usable": false
+      },
       "coulomb_current": {
         "coulomb_current_a": {
           "count": 3,
@@ -587,6 +826,12 @@
           "maximum": 0.045427501003314136,
           "median": 0.04530448298826862,
           "minimum": 0.04517112567458997
+        },
+        "command_minus_position_center_bias_rad": {
+          "count": 3,
+          "maximum": 0.00031436597779225736,
+          "median": 0.0002768345811819846,
+          "minimum": 0.0002620061002324373
         },
         "effective_backlash_rad": {
           "count": 3,
@@ -634,6 +879,9 @@
       }
     },
     "R_Leg_hip_pitch": {
+      "command_path_model": {
+        "usable": false
+      },
       "coulomb_current": {
         "coulomb_current_a": {
           "count": 3,
@@ -676,6 +924,12 @@
           "median": 0.045824121552474645,
           "minimum": 0.04573136100541287
         },
+        "command_minus_position_center_bias_rad": {
+          "count": 2,
+          "maximum": 0.0059743236615157624,
+          "median": 0.005925543072460994,
+          "minimum": 0.005876762483406225
+        },
         "effective_backlash_rad": {
           "count": 2,
           "maximum": 0.008356535958886468,
@@ -715,6 +969,9 @@
       }
     },
     "R_Leg_hip_roll": {
+      "command_path_model": {
+        "usable": false
+      },
       "coulomb_current": {
         "coulomb_current_a": {
           "count": 2,
@@ -749,6 +1006,12 @@
           "maximum": 0.043292843530153134,
           "median": 0.043042029018166075,
           "minimum": 0.042791214506179016
+        },
+        "command_minus_position_center_bias_rad": {
+          "count": 2,
+          "maximum": 0.0003953558000695037,
+          "median": 0.0003294968915762801,
+          "minimum": 0.0002636379830830565
         },
         "effective_backlash_rad": {
           "count": 2,
@@ -789,6 +1052,9 @@
       }
     },
     "R_Leg_hip_yaw": {
+      "command_path_model": {
+        "usable": false
+      },
       "coulomb_current": {
         "coulomb_current_a": {
           "count": 2,
@@ -823,6 +1089,12 @@
           "maximum": 0.044612276457961494,
           "median": 0.044319547003219675,
           "minimum": 0.044026817548477856
+        },
+        "command_minus_position_center_bias_rad": {
+          "count": 2,
+          "maximum": 0.00046980718263642956,
+          "median": 0.0004259353321029057,
+          "minimum": 0.0003820634815693818
         },
         "effective_backlash_rad": {
           "count": 2,
@@ -863,6 +1135,9 @@
       }
     },
     "R_Leg_knee": {
+      "command_path_model": {
+        "usable": false
+      },
       "coulomb_current": {
         "coulomb_current_a": {
           "count": 2,
@@ -897,6 +1172,12 @@
           "maximum": 0.05365455593349767,
           "median": 0.05361073748715907,
           "minimum": 0.05356691904082047
+        },
+        "command_minus_position_center_bias_rad": {
+          "count": 2,
+          "maximum": 0.008241155112344474,
+          "median": 0.008040919486832467,
+          "minimum": 0.00784068386132046
         },
         "effective_backlash_rad": {
           "count": 2,
@@ -947,8 +1228,9 @@
   "measurement_domain": "rigid-upper-body suspended robot at 50 Hz using encoder/current telemetry",
   "purpose": "Reproducible aggregation of validated suspended RND STEP actuator-identification runs.",
   "quality_summary": {
+    "command_path_usable_joint_count": 12,
     "coulomb_usable_joint_count": 11,
-    "fully_usable_joint_count": 10,
+    "fully_usable_joint_count": 11,
     "joint_count": 12,
     "target_usable_joint_count": 11
   },

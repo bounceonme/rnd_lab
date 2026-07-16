@@ -1,0 +1,20 @@
+[serial]
+port = "auto"
+baudrate = 921600
+read_timeout_s = 0.05
+
+[experiment]
+policy_hz = 50.0
+baseline_duration_s = 5.0
+neutral_duration_s = 2.0
+half_cycle_s = 1.0
+cycles = 6
+center_hold_s = 2.0
+countdown_s = 3
+
+[quality]
+maximum_relative_lag_ms = 150.0
+minimum_correlation = 0.80
+minimum_axis_rms_rad_s = 0.05
+minimum_dominance_ratio = 2.0
+maximum_checksum_error_fraction = 0.001
