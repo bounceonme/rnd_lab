@@ -46,6 +46,8 @@ class RndImuTaskWiringTest(unittest.TestCase):
         hardware_source = HARDWARE_INIT.read_text(encoding="utf-8")
 
         self.assertIn("from .imu_observations import *", mdp_source)
+        self.assertIn("from .encoder_observations import *", mdp_source)
+        self.assertIn("from .touchdown import *", mdp_source)
         for symbol in (
             "CMP10ARuntimeAdapter",
             "CMP10ARuntimeSource",

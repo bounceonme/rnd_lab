@@ -11,6 +11,7 @@ from typing import Any
 
 import torch
 from isaaclab.managers import ManagerTermBase
+from isaaclab.utils import math as math_utils
 
 
 _REPO_ROOT = Path(__file__).resolve().parents[8]
@@ -51,6 +52,7 @@ class RndCmp10aObservationModel:
     gyro_noise_sigma_range_rad_s: tuple[float, float]
     gravity_delay_range_s: tuple[float, float]
     gravity_noise_sigma_range_rad: tuple[float, float]
+    sensor_to_base_matrix: tuple[tuple[float, float, float], ...]
 
 
 def _find_named_value(data: Mapping[str, Any], aliases: tuple[str, ...], *, max_depth: int) -> tuple[Any, str] | None:
@@ -103,6 +105,40 @@ def _coerce_range(value: Any, label: str) -> tuple[float, float]:
     if result[0] > result[1]:
         raise RndCmp10aObservationModelError(f"{label} minimum exceeds its maximum: {result}.")
     return result
+
+
+def _coerce_rotation_matrix(value: Any, label: str) -> tuple[tuple[float, float, float], ...]:
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes)) or len(value) != 3:
+        raise RndCmp10aObservationModelError(f"{label} must be a 3x3 matrix; got {value!r}.")
+    rows = []
+    for row_index, row in enumerate(value):
+        if not isinstance(row, Sequence) or isinstance(row, (str, bytes)) or len(row) != 3:
+            raise RndCmp10aObservationModelError(f"{label}[{row_index}] must contain three values; got {row!r}.")
+        try:
+            numeric_row = tuple(float(item) for item in row)
+        except (TypeError, ValueError) as error:
+            raise RndCmp10aObservationModelError(
+                f"{label}[{row_index}] contains a non-numeric value: {row!r}."
+            ) from error
+        if not all(math.isfinite(item) for item in numeric_row):
+            raise RndCmp10aObservationModelError(f"{label}[{row_index}] must contain finite values.")
+        rows.append(numeric_row)
+
+    matrix = tuple(rows)
+    for row_index in range(3):
+        for other_index in range(3):
+            dot = sum(matrix[row_index][column] * matrix[other_index][column] for column in range(3))
+            expected = 1.0 if row_index == other_index else 0.0
+            if not math.isclose(dot, expected, rel_tol=0.0, abs_tol=1.0e-6):
+                raise RndCmp10aObservationModelError(f"{label} must be orthonormal.")
+    determinant = (
+        matrix[0][0] * (matrix[1][1] * matrix[2][2] - matrix[1][2] * matrix[2][1])
+        - matrix[0][1] * (matrix[1][0] * matrix[2][2] - matrix[1][2] * matrix[2][0])
+        + matrix[0][2] * (matrix[1][0] * matrix[2][1] - matrix[1][1] * matrix[2][0])
+    )
+    if not math.isclose(determinant, 1.0, rel_tol=0.0, abs_tol=1.0e-6):
+        raise RndCmp10aObservationModelError(f"{label} must be a proper rotation with determinant +1.")
+    return matrix
 
 
 def _validate_distribution(value: Any, label: str, expected: tuple[str, ...]) -> None:
@@ -305,6 +341,26 @@ def load_rnd_cmp10a_observation_model(
         ),
         distributions=("log_uniform", "zero_mean_tangent_plane_gaussian"),
     )
+    runtime_transform = payload.get("runtime_transform")
+    if not isinstance(runtime_transform, Mapping):
+        raise RndCmp10aObservationModelError("CMP10A observation model requires a runtime_transform object.")
+    if runtime_transform.get("source_frame") != "sensor" or runtime_transform.get("target_frame") != "base_link":
+        raise RndCmp10aObservationModelError(
+            "CMP10A runtime_transform must map source_frame='sensor' to target_frame='base_link'."
+        )
+    sensor_to_base_matrix = _coerce_rotation_matrix(
+        runtime_transform.get("sensor_to_base_matrix"),
+        "runtime_transform.sensor_to_base_matrix",
+    )
+    canonical_matrix = _coerce_rotation_matrix(payload.get("sensor_to_base_matrix"), "sensor_to_base_matrix")
+    if any(
+        not math.isclose(actual, expected, rel_tol=0.0, abs_tol=1.0e-12)
+        for actual_row, expected_row in zip(sensor_to_base_matrix, canonical_matrix, strict=True)
+        for actual, expected in zip(actual_row, expected_row, strict=True)
+    ):
+        raise RndCmp10aObservationModelError(
+            "runtime_transform.sensor_to_base_matrix must match the canonical sensor_to_base_matrix."
+        )
     return RndCmp10aObservationModel(
         path=model_path,
         policy_hz=policy_hz,
@@ -314,6 +370,7 @@ def load_rnd_cmp10a_observation_model(
         gyro_noise_sigma_range_rad_s=gyro_noise,
         gravity_delay_range_s=gravity_delay,
         gravity_noise_sigma_range_rad=gravity_noise,
+        sensor_to_base_matrix=sensor_to_base_matrix,
     )
 
 
@@ -373,6 +430,21 @@ def apply_tangent_plane_angular_noise(vectors: torch.Tensor, angular_noise: torc
     sin_over_angle = torch.where(angle > epsilon, sin_over_angle, torch.ones_like(angle))
     rotated = torch.cos(angle) * unit_vectors + sin_over_angle * tangent
     return _normalize_vectors(rotated)
+
+
+def transform_sensor_vectors_to_base(vectors: torch.Tensor, sensor_to_base_matrix: torch.Tensor) -> torch.Tensor:
+    """Rotate batched sensor-frame vectors into the policy's base frame."""
+
+    if vectors.ndim != 2 or vectors.shape[1] != 3 or not vectors.is_floating_point():
+        raise ValueError(f"vectors must be a floating-point tensor with shape [num_envs, 3]; got {vectors.shape}.")
+    if sensor_to_base_matrix.shape != (3, 3) or not sensor_to_base_matrix.is_floating_point():
+        raise ValueError(
+            "sensor_to_base_matrix must be a floating-point tensor with shape [3, 3]; "
+            f"got {sensor_to_base_matrix.shape}."
+        )
+    if sensor_to_base_matrix.device != vectors.device or sensor_to_base_matrix.dtype != vectors.dtype:
+        raise ValueError("sensor_to_base_matrix must use the same device and dtype as vectors.")
+    return vectors @ sensor_to_base_matrix.transpose(0, 1)
 
 
 class Cmp10aObservationState:
@@ -536,7 +608,7 @@ class Cmp10aObservationState:
 
 
 class RndCmp10aObservation(ManagerTermBase):
-    """Manager term wrapping one stateful CMP10A policy observation channel."""
+    """Read one IMU link and reproduce the base-frame CMP10A policy channel."""
 
     def __init__(self, cfg, env):
         super().__init__(cfg, env)
@@ -547,7 +619,22 @@ class RndCmp10aObservation(ManagerTermBase):
         self._channel = channel
         self._sample_randomization = bool(params["sample_randomization"])
         self._model_path_param = str(params["model_path"])
+        self._body_name = str(params["body_name"])
+        asset = env.scene["robot"]
+        body_ids, body_names = asset.find_bodies(self._body_name, preserve_order=True)
+        if len(body_ids) != 1:
+            raise ValueError(
+                f"CMP10A body_name={self._body_name!r} must resolve to exactly one rigid body; matched {body_names!r}."
+            )
+        self._body_id = int(body_ids[0])
         self._model = load_rnd_cmp10a_observation_model(params["model_path"])
+        body_quat_w = asset.data.body_quat_w
+        self._sensor_to_base_matrix = torch.tensor(
+            self._model.sensor_to_base_matrix,
+            device=body_quat_w.device,
+            dtype=body_quat_w.dtype,
+        )
+        self._validate_mount_alignment(asset)
         expected_scale = self._model.policy_angular_velocity_scale if channel == "gyro" else 1.0
         try:
             configured_scale = float(cfg.scale)
@@ -565,7 +652,7 @@ class RndCmp10aObservation(ManagerTermBase):
             raise ValueError(
                 f"CMP10A model policy_hz={self._model.policy_hz} does not match 1/env.step_dt={environment_policy_hz}."
             )
-        raw = self._raw(env)
+        raw = self._raw_sensor(env)
         if channel == "gyro":
             delay_range = self._model.gyro_delay_range_s
             bias_range = self._model.gyro_bias_range_rad_s
@@ -593,16 +680,56 @@ class RndCmp10aObservation(ManagerTermBase):
 
         return self._state
 
-    def _raw(self, env) -> torch.Tensor:
+    @property
+    def body_name(self) -> str:
+        """Name of the rigid body used as the simulated sensor frame."""
+
+        return self._body_name
+
+    @property
+    def body_id(self) -> int:
+        """Resolved articulation body index used by the simulated sensor."""
+
+        return self._body_id
+
+    def _validate_mount_alignment(self, asset) -> None:
+        data = asset.data
+        sensor_quat_w = data.body_quat_w[0, self._body_id].unsqueeze(0).expand(3, -1)
+        base_quat_w = data.root_link_quat_w[0].unsqueeze(0).expand(3, -1)
+        sensor_basis = torch.eye(3, device=sensor_quat_w.device, dtype=sensor_quat_w.dtype)
+        basis_w = math_utils.quat_apply(sensor_quat_w, sensor_basis)
+        basis_b = math_utils.quat_apply_inverse(base_quat_w, basis_w)
+        urdf_sensor_to_base = basis_b.transpose(0, 1)
+        maximum_error = torch.max(torch.abs(urdf_sensor_to_base - self._sensor_to_base_matrix))
+        if float(maximum_error) > 1.0e-3:
+            raise ValueError(
+                f"URDF body {self._body_name!r} orientation does not match the measured CMP10A sensor-to-base "
+                f"transform (max_abs_error={float(maximum_error):.6f})."
+            )
+
+    def _raw_sensor(self, env) -> torch.Tensor:
         asset = env.scene["robot"]
+        sensor_quat_w = asset.data.body_quat_w[:, self._body_id]
         if self._channel == "gyro":
-            return asset.data.root_ang_vel_b
-        return asset.data.projected_gravity_b
+            vector_w = asset.data.body_ang_vel_w[:, self._body_id]
+        else:
+            vector_w = asset.data.GRAVITY_VEC_W
+        return math_utils.quat_apply_inverse(sensor_quat_w, vector_w)
+
+    def _to_base(self, sensor_vectors: torch.Tensor) -> torch.Tensor:
+        return transform_sensor_vectors_to_base(sensor_vectors, self._sensor_to_base_matrix)
 
     def reset(self, env_ids: Sequence[int] | torch.Tensor | None = None) -> None:
-        self._state.reset(self._raw(self._env), env_ids)
+        self._state.reset(self._raw_sensor(self._env), env_ids)
 
-    def __call__(self, env, channel: str, model_path: str, sample_randomization: bool) -> torch.Tensor:
+    def __call__(
+        self,
+        env,
+        channel: str,
+        model_path: str,
+        sample_randomization: bool,
+        body_name: str,
+    ) -> torch.Tensor:
         if channel != self._channel:
             raise RuntimeError(
                 f"CMP10A observation channel changed after initialization: {self._channel!r} -> {channel!r}."
@@ -611,4 +738,7 @@ class RndCmp10aObservation(ManagerTermBase):
             raise RuntimeError("CMP10A observation model_path changed after term initialization.")
         if bool(sample_randomization) != self._sample_randomization:
             raise RuntimeError("CMP10A sample_randomization changed after term initialization.")
-        return self._state.observe(self._raw(env), env.common_step_counter)
+        if str(body_name) != self._body_name:
+            raise RuntimeError("CMP10A body_name changed after term initialization.")
+        sensor_observation = self._state.observe(self._raw_sensor(env), env.common_step_counter)
+        return self._to_base(sensor_observation)

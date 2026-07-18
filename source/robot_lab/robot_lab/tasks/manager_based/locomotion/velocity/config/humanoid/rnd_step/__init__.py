@@ -43,7 +43,7 @@ gym.register(
 
 gym.register(
     id="RNDLab-Isaac-Velocity-Flat-RND-Step-Actuator-IMU-v0",
-    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    entry_point=f"{__name__}.rnd_step_env:RndStepManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
         "env_cfg_entry_point": f"{__name__}.flat_actuator_imu_env_cfg:RndStepFlatActuatorImuEnvCfg",

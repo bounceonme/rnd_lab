@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "model_type": "rnd_dynamixel_encoder_policy_observation",
+  "integration_enabled": true,
+  "joint_order": [
+    "R_Leg_hip_yaw",
+    "R_Leg_hip_roll",
+    "R_Leg_hip_pitch",
+    "R_Leg_knee",
+    "R_Leg_ankle_pitch",
+    "R_Leg_ankle_roll",
+    "L_Leg_hip_yaw",
+    "L_Leg_hip_roll",
+    "L_Leg_hip_pitch",
+    "L_Leg_knee",
+    "L_Leg_ankle_pitch",
+    "L_Leg_ankle_roll"
+  ],
+  "policy_hz": 50.0,
+  "policy_observation": {
+    "output_order": [
+      "q_rel",
+      "dq_scaled"
+    ],
+    "position_dimensions": 12,
+    "velocity_dimensions": 12,
+    "total_dimensions": 24,
+    "velocity_scale": 0.05,
+    "q_rel_definition": "quantize(q_delayed + zero_offset) - default_joint_position",
+    "dq_scaled_definition": "quantize(dq_delayed) * velocity_scale"
+  },
+  "encoder_quantization": {
+    "position": {
+      "ticks_per_revolution": 4096,
+      "quantum_rad": 0.0015339807878856412,
+      "rounding": "nearest_ties_to_even",
+      "source": "Dynamixel MX-106 4096-count position unit",
+      "quality": "vendor_unit_and_repository_mapping"
+    },
+    "velocity": {
+      "quantum_rpm": 0.229,
+      "quantum_rad_s": 0.023980823922402087,
+      "rounding": "nearest_ties_to_even",
+      "source": "Dynamixel MX-106 present-velocity unit 0.229 rpm",
+      "quality": "vendor_unit_and_repository_mapping"
+    }
+  },
+  "sample_age": {
+    "distribution": "uniform",
+    "range_s": [
+      0.0,
+      0.005
+    ],
+    "sampling_scope": "per_episode_per_environment_per_joint",
+    "shared_between_q_and_dq": true,
+    "definition": "age_of_encoder_sample_at_policy_observation_time",
+    "interpolation": "delayed=(1-age/step_dt)*current+(age/step_dt)*previous",
+    "source": "training_prior_not_measured",
+    "quality": "assumed_for_training_only"
+  },
+  "zero_offset": {
+    "distribution": "uniform",
+    "range_rad": [
+      -0.005,
+      0.005
+    ],
+    "sampling_scope": "per_episode_per_environment_per_joint",
+    "application": "added_to_delayed_absolute_position_before_quantization",
+    "source": "training_prior_not_measured",
+    "quality": "assumed_for_training_only",
+    "replaces_iid_position_noise_range_rad": [
+      -0.01,
+      0.01
+    ]
+  },
+  "zoh": {
+    "clock": "env.common_step_counter",
+    "hold_scope": "one_output_per_policy_step",
+    "duplicate_compute": "return_cached_output_without_state_advance"
+  },
+  "quality": {
+    "runtime_status": "training_prior_not_measured",
+    "hardware_measurement_used_for_priors": false,
+    "intended_use": "policy_training_domain_randomization"
+  },
+  "limitations": [
+    "Zero-offset and sample-age ranges are training priors, not measured confidence intervals.",
+    "Delay uses only previous/current 50 Hz policy states, so intra-step motion is linearized.",
+    "ZOH is keyed by env.common_step_counter and does not model asynchronous per-servo packet timing.",
+    "Packet loss, bus skew, encoder wraparound, and calibration-direction errors are outside this model."
+  ]
+}

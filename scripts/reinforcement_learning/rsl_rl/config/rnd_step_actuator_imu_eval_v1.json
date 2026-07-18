@@ -1,0 +1,480 @@
+{
+  "schema_version": 1,
+  "suite": {
+    "id": "rnd-step-actuator-imu-fixed-v1",
+    "description": "Fixed in-training-envelope validation and held-out test cases for the RND STEP actuator and CMP10A task.",
+    "splits": ["validation", "test"]
+  },
+  "task": {
+    "id": "RNDLab-Isaac-Velocity-Flat-RND-Step-Actuator-IMU-v0",
+    "command_name": "base_velocity",
+    "episode_horizon_steps": 1000,
+    "expected_actor_observation_dimension": 171,
+    "root_quaternion_order": "wxyz",
+    "foot_order": ["right", "left"],
+    "joint_order": [
+      "R_Leg_hip_yaw",
+      "R_Leg_hip_roll",
+      "R_Leg_hip_pitch",
+      "R_Leg_knee",
+      "R_Leg_ankle_pitch",
+      "R_Leg_ankle_roll",
+      "L_Leg_hip_yaw",
+      "L_Leg_hip_roll",
+      "L_Leg_hip_pitch",
+      "L_Leg_knee",
+      "L_Leg_ankle_pitch",
+      "L_Leg_ankle_roll"
+    ],
+    "artifact_ids": [
+      "actuator-command-path",
+      "actuator-torque-randomization",
+      "actuator-armature-randomization",
+      "cmp10a-observation-model"
+    ],
+    "command_bounds": {
+      "lin_vel_x_m_s": {"minimum": -0.1, "maximum": 0.1},
+      "lin_vel_y_m_s": {"minimum": -0.65, "maximum": 0.0},
+      "ang_vel_z_rad_s": {"minimum": -1.0, "maximum": 1.0}
+    },
+    "push_velocity_bounds": {
+      "lin_vel_x_m_s": {"minimum": -0.2, "maximum": 0.2},
+      "lin_vel_y_m_s": {"minimum": -0.2, "maximum": 0.2},
+      "ang_vel_z_rad_s": {"minimum": -0.18, "maximum": 0.18}
+    }
+  },
+  "rates": {
+    "physics_hz": 200.0,
+    "policy_hz": 50.0,
+    "contact_hz": 200.0,
+    "metric_hz": 50.0
+  },
+  "artifacts": [
+    {
+      "id": "actuator-command-path",
+      "path": "scripts/tools/config/rnd_actuator_model_runtime.json",
+      "sha256": "4ad0b53258b2f087e504a09caadd4a547da256678f036dd2f3b5c9ddaa8d804a"
+    },
+    {
+      "id": "actuator-torque-randomization",
+      "path": "scripts/tools/config/rnd_torque_randomization.json",
+      "sha256": "5ededd2ba12c0ca3eb9059389f148463fb38944b57d79efb7131a3e3fd08abe7"
+    },
+    {
+      "id": "actuator-armature-randomization",
+      "path": "scripts/tools/config/rnd_armature_randomization.json",
+      "sha256": "43d96820fa0093f211af26428277221724c0fd03961e7d6d20499b0f8d474240"
+    },
+    {
+      "id": "cmp10a-observation-model",
+      "path": "scripts/tools/config/rnd_cmp10a_runtime.json",
+      "sha256": "8c5f18af7040fb8ac92977beb90168846ed61fa73f1ab67b3b18b9c4e85549dc"
+    }
+  ],
+  "metric_contract": {
+    "version": 1,
+    "fall": {
+      "termination_semantics": "early_termination_is_fall",
+      "horizon_completion_is_survival": true
+    },
+    "tracking": {
+      "linear_velocity_frame": "root_yaw",
+      "yaw_rate_frame": "world_z",
+      "root_quaternion_order": "wxyz",
+      "rmse_definition": "root_mean_squared_euclidean_error"
+    },
+    "posture": {
+      "root_quaternion_order": "wxyz",
+      "lateral_tilt_component": "projected_gravity_body_x",
+      "sagittal_tilt_component": "projected_gravity_body_y",
+      "sample_gate": "command_xy_speed_above_gait_threshold"
+    },
+    "gait": {
+      "foot_order": ["right", "left"],
+      "minimum_touchdown_progress_m": 0.04,
+      "tap_max_air_time_s": 0.06,
+      "command_speed_threshold_m_s": 0.1
+    },
+    "torque_saturation": {"threshold_fraction": 0.98},
+    "push_recovery": {
+      "linear_velocity_error_threshold_m_s": 0.15,
+      "yaw_rate_error_threshold_rad_s": 0.2,
+      "dwell_s": 0.4
+    },
+    "aggregation": {
+      "order": "episode_then_case",
+      "episode_weighting": "equal",
+      "case_weighting": "equal"
+    }
+  },
+  "domains": [
+    {
+      "id": "validation-center",
+      "split": "validation",
+      "resolved": {
+        "material": {
+          "static_friction": 0.85,
+          "dynamic_friction": 0.65,
+          "restitution": 0.075
+        },
+        "base_mass_add_kg": 0.3052887,
+        "other_mass_scale": 1.0,
+        "base_com_offset_m": {"x": 0.0, "y": 0.0, "z": 0.0},
+        "encoder": {
+          "zero_offset_rad": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+          "sample_age_s": [0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025]
+        },
+        "actuator": {
+          "stiffness_scale": 1.0,
+          "damping_scale": 1.0,
+          "motor_strength_scale": 1.025,
+          "coulomb_torque_nm": 0.1728,
+          "friction_transition_velocity_rad_s": 0.08726646259971647
+        },
+        "imu": {
+          "gyro": {"delay_s": 0.0025, "noise_sigma": 0.0009486832980505138, "bias": 0.0},
+          "gravity": {"delay_s": 0.01, "noise_sigma": 0.00031622776601683794, "bias": 0.0}
+        }
+      }
+    },
+    {
+      "id": "validation-low-traction-heavy",
+      "split": "validation",
+      "resolved": {
+        "material": {
+          "static_friction": 0.62,
+          "dynamic_friction": 0.45,
+          "restitution": 0.12
+        },
+        "base_mass_add_kg": 0.39,
+        "other_mass_scale": 1.04,
+        "base_com_offset_m": {"x": 0.012, "y": -0.01, "z": 0.008},
+        "encoder": {
+          "zero_offset_rad": [-0.004, 0.003, -0.002, 0.004, -0.003, 0.002, 0.004, -0.003, 0.002, -0.004, 0.003, -0.002],
+          "sample_age_s": [0.0045, 0.004, 0.0035, 0.0045, 0.004, 0.0035, 0.0035, 0.004, 0.0045, 0.0035, 0.004, 0.0045]
+        },
+        "actuator": {
+          "stiffness_scale": 1.0,
+          "damping_scale": 1.0,
+          "motor_strength_scale": 0.85,
+          "coulomb_torque_nm": 0.1738,
+          "friction_transition_velocity_rad_s": 0.05
+        },
+        "imu": {
+          "gyro": {"delay_s": 0.004, "noise_sigma": 0.0022, "bias": 0.007},
+          "gravity": {"delay_s": 0.016, "noise_sigma": 0.0015, "bias": 0.0}
+        }
+      }
+    },
+    {
+      "id": "test-cross-low-delay",
+      "split": "test",
+      "resolved": {
+        "material": {
+          "static_friction": 0.72,
+          "dynamic_friction": 0.58,
+          "restitution": 0.03
+        },
+        "base_mass_add_kg": 0.225,
+        "other_mass_scale": 1.03,
+        "base_com_offset_m": {"x": -0.011, "y": 0.009, "z": -0.007},
+        "encoder": {
+          "zero_offset_rad": [0.003, -0.002, 0.004, -0.003, 0.002, -0.004, -0.003, 0.002, -0.004, 0.003, -0.002, 0.004],
+          "sample_age_s": [0.0005, 0.001, 0.0015, 0.0005, 0.001, 0.0015, 0.0015, 0.001, 0.0005, 0.0015, 0.001, 0.0005]
+        },
+        "actuator": {
+          "stiffness_scale": 1.0,
+          "damping_scale": 1.0,
+          "motor_strength_scale": 0.92,
+          "coulomb_torque_nm": 0.1722,
+          "friction_transition_velocity_rad_s": 0.125
+        },
+        "imu": {
+          "gyro": {"delay_s": 0.001, "noise_sigma": 0.0017, "bias": -0.008},
+          "gravity": {"delay_s": 0.004, "noise_sigma": 0.0011, "bias": 0.0}
+        }
+      }
+    },
+    {
+      "id": "test-cross-high-strength",
+      "split": "test",
+      "resolved": {
+        "material": {
+          "static_friction": 1.06,
+          "dynamic_friction": 0.82,
+          "restitution": 0.14
+        },
+        "base_mass_add_kg": 0.34,
+        "other_mass_scale": 0.96,
+        "base_com_offset_m": {"x": 0.006, "y": 0.013, "z": -0.004},
+        "encoder": {
+          "zero_offset_rad": [0.005, -0.004, 0.003, -0.005, 0.004, -0.003, -0.005, 0.004, -0.003, 0.005, -0.004, 0.003],
+          "sample_age_s": [0.0048, 0.0042, 0.0038, 0.0048, 0.0042, 0.0038, 0.0038, 0.0042, 0.0048, 0.0038, 0.0042, 0.0048]
+        },
+        "actuator": {
+          "stiffness_scale": 1.0,
+          "damping_scale": 1.0,
+          "motor_strength_scale": 1.18,
+          "coulomb_torque_nm": 0.1732,
+          "friction_transition_velocity_rad_s": 0.07
+        },
+        "imu": {
+          "gyro": {"delay_s": 0.0047, "noise_sigma": 0.00055, "bias": 0.009},
+          "gravity": {"delay_s": 0.018, "noise_sigma": 0.00018, "bias": 0.0}
+        }
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "validation-stand-start-stop",
+      "split": "validation",
+      "horizon_steps": 1000,
+      "segments": [
+        {
+          "id": "stand",
+          "start_step": 0,
+          "end_step": 100,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": 0.0, "ang_vel_z_rad_s": 0.0}
+        },
+        {
+          "id": "start",
+          "start_step": 100,
+          "end_step": 400,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": -0.45, "ang_vel_z_rad_s": 0.0}
+        },
+        {
+          "id": "stop",
+          "start_step": 400,
+          "end_step": 1000,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": 0.0, "ang_vel_z_rad_s": 0.0}
+        }
+      ],
+      "pulses": []
+    },
+    {
+      "id": "validation-straight-turn-straight-stop",
+      "split": "validation",
+      "horizon_steps": 1000,
+      "segments": [
+        {
+          "id": "stand",
+          "start_step": 0,
+          "end_step": 100,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": 0.0, "ang_vel_z_rad_s": 0.0}
+        },
+        {
+          "id": "straight-before",
+          "start_step": 100,
+          "end_step": 300,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": -0.4, "ang_vel_z_rad_s": 0.0}
+        },
+        {
+          "id": "left-turn",
+          "start_step": 300,
+          "end_step": 500,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": -0.4, "ang_vel_z_rad_s": 0.65}
+        },
+        {
+          "id": "straight-after",
+          "start_step": 500,
+          "end_step": 700,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": -0.4, "ang_vel_z_rad_s": 0.0}
+        },
+        {
+          "id": "stop",
+          "start_step": 700,
+          "end_step": 1000,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": 0.0, "ang_vel_z_rad_s": 0.0}
+        }
+      ],
+      "pulses": []
+    },
+    {
+      "id": "validation-pulse-recovery",
+      "split": "validation",
+      "horizon_steps": 1000,
+      "segments": [
+        {
+          "id": "stand",
+          "start_step": 0,
+          "end_step": 100,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": 0.0, "ang_vel_z_rad_s": 0.0}
+        },
+        {
+          "id": "straight",
+          "start_step": 100,
+          "end_step": 400,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": -0.5, "ang_vel_z_rad_s": 0.0}
+        },
+        {
+          "id": "stop",
+          "start_step": 400,
+          "end_step": 1000,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": 0.0, "ang_vel_z_rad_s": 0.0}
+        }
+      ],
+      "pulses": [
+        {
+          "id": "validation-lateral-pulse",
+          "start_step": 240,
+          "end_step": 246,
+          "root_velocity": {"lin_vel_x_m_s": 0.16, "lin_vel_y_m_s": 0.12, "ang_vel_z_rad_s": 0.0}
+        }
+      ]
+    },
+    {
+      "id": "test-stand-start-stop",
+      "split": "test",
+      "horizon_steps": 1000,
+      "segments": [
+        {
+          "id": "stand",
+          "start_step": 0,
+          "end_step": 100,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": 0.0, "ang_vel_z_rad_s": 0.0}
+        },
+        {
+          "id": "start",
+          "start_step": 100,
+          "end_step": 400,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": -0.58, "ang_vel_z_rad_s": 0.0}
+        },
+        {
+          "id": "stop",
+          "start_step": 400,
+          "end_step": 1000,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": 0.0, "ang_vel_z_rad_s": 0.0}
+        }
+      ],
+      "pulses": []
+    },
+    {
+      "id": "test-straight-turn-straight-stop",
+      "split": "test",
+      "horizon_steps": 1000,
+      "segments": [
+        {
+          "id": "stand",
+          "start_step": 0,
+          "end_step": 100,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": 0.0, "ang_vel_z_rad_s": 0.0}
+        },
+        {
+          "id": "straight-before",
+          "start_step": 100,
+          "end_step": 300,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": -0.5, "ang_vel_z_rad_s": 0.0}
+        },
+        {
+          "id": "right-turn",
+          "start_step": 300,
+          "end_step": 500,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": -0.5, "ang_vel_z_rad_s": -0.8}
+        },
+        {
+          "id": "straight-after",
+          "start_step": 500,
+          "end_step": 700,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": -0.5, "ang_vel_z_rad_s": 0.0}
+        },
+        {
+          "id": "stop",
+          "start_step": 700,
+          "end_step": 1000,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": 0.0, "ang_vel_z_rad_s": 0.0}
+        }
+      ],
+      "pulses": []
+    },
+    {
+      "id": "test-pulse-recovery",
+      "split": "test",
+      "horizon_steps": 1000,
+      "segments": [
+        {
+          "id": "stand",
+          "start_step": 0,
+          "end_step": 100,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": 0.0, "ang_vel_z_rad_s": 0.0}
+        },
+        {
+          "id": "straight",
+          "start_step": 100,
+          "end_step": 400,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": -0.35, "ang_vel_z_rad_s": 0.0}
+        },
+        {
+          "id": "stop",
+          "start_step": 400,
+          "end_step": 1000,
+          "command": {"lin_vel_x_m_s": 0.0, "lin_vel_y_m_s": 0.0, "ang_vel_z_rad_s": 0.0}
+        }
+      ],
+      "pulses": [
+        {
+          "id": "test-diagonal-pulse",
+          "start_step": 300,
+          "end_step": 306,
+          "root_velocity": {"lin_vel_x_m_s": -0.18, "lin_vel_y_m_s": -0.15, "ang_vel_z_rad_s": 0.0}
+        }
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "validation-center-stand",
+      "split": "validation",
+      "domain_id": "validation-center",
+      "scenario_id": "validation-stand-start-stop",
+      "seed": 1701,
+      "episodes": 8,
+      "recovery_pulse_id": null
+    },
+    {
+      "id": "validation-heavy-turn",
+      "split": "validation",
+      "domain_id": "validation-low-traction-heavy",
+      "scenario_id": "validation-straight-turn-straight-stop",
+      "seed": 1702,
+      "episodes": 8,
+      "recovery_pulse_id": null
+    },
+    {
+      "id": "validation-center-pulse",
+      "split": "validation",
+      "domain_id": "validation-center",
+      "scenario_id": "validation-pulse-recovery",
+      "seed": 1703,
+      "episodes": 8,
+      "recovery_pulse_id": "validation-lateral-pulse"
+    },
+    {
+      "id": "test-low-delay-stand",
+      "split": "test",
+      "domain_id": "test-cross-low-delay",
+      "scenario_id": "test-stand-start-stop",
+      "seed": 9101,
+      "episodes": 8,
+      "recovery_pulse_id": null
+    },
+    {
+      "id": "test-high-strength-turn",
+      "split": "test",
+      "domain_id": "test-cross-high-strength",
+      "scenario_id": "test-straight-turn-straight-stop",
+      "seed": 9102,
+      "episodes": 8,
+      "recovery_pulse_id": null
+    },
+    {
+      "id": "test-high-strength-pulse",
+      "split": "test",
+      "domain_id": "test-cross-high-strength",
+      "scenario_id": "test-pulse-recovery",
+      "seed": 9103,
+      "episodes": 8,
+      "recovery_pulse_id": "test-diagonal-pulse"
+    }
+  ]
+}

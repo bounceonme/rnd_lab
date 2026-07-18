@@ -125,6 +125,98 @@ confidence intervals. Axis signs and static gravity gain are not randomized.
 The checked-in model is authoritative for the actor angular-velocity scale;
 the task fails during construction if its observation scale disagrees.
 
+## Temporal Actor Observation
+
+The IMU-aware actor now uses four policy-rate samples for the hidden sensor and
+actuator state that cannot be inferred from one frame. At 50 Hz this covers the
+current sample plus 60 ms of history. Isaac Lab flattens each term from oldest
+to newest and concatenates the terms in this order:
+
+1. CMP10A angular velocity: `4 x 3 = 12` values;
+2. CMP10A projected gravity: `4 x 3 = 12` values;
+3. current velocity command: `3` values;
+4. Dynamixel position/velocity sample: `4 x 24 = 96` values;
+5. previous action: `4 x 12 = 48` values.
+
+The actor input is therefore 171 values. On reset, all four slots are filled
+with the current value; no artificial zero-history transient is introduced.
+The critic remains a current-state privileged observation and is not expanded.
+Consequently, older 45-value actor checkpoints are not compatible with this
+task and a fresh training run is required.
+
+The 24-value encoder term is ordered as 12 relative positions followed by 12
+scaled velocities. It applies MX-106 position and velocity quantization, one
+episode-persistent zero offset per joint, a shared position/velocity sample age
+per joint, previous/current interpolation, and policy-step zero-order hold.
+The offset `+/-0.005 rad` and age `0-5 ms` envelopes are training priors rather
+than measurements.
+
+## Touchdown Objective And Telemetry
+
+The IMU-aware task observes contact and foot vertical velocity at every 200 Hz
+physics update. A touchdown is valid only after at least 60 ms airborne. During
+walking commands, downward speed above `0.25 m/s` receives a small linear hinge
+penalty that reaches its cap at `0.75 m/s`; standing commands are excluded. The
+monitor handles independent and simultaneous foot contacts and snapshots a
+terminal event before an environment reset.
+
+The evaluation telemetry is written as chunked, pickle-free NPZ data at 200 Hz.
+This preserves the pre-impact sample that a 50 Hz policy log can miss and keeps
+the reward calculation separate from the recorded behavior metrics. Evaluation
+uses the monitor's exact 200 Hz first-contact event, preceding air time, and
+pre-impact speed directly; it does not reconstruct touchdown from a downsampled
+50 Hz contact edge. The telemetry path also attaches the shared monitor itself
+when the reward term is absent, so metric collection does not depend on reward
+configuration.
+
+## Command Transitions
+
+Training retains the original random command process in 70% of environments.
+The remaining environments sample one deterministic time structure per episode:
+
+- 15% use stand `0-2 s`, translate `2-8 s`, then stop;
+- 15% use stand `0-2 s`, translate `2-6 s`, turn while translating `6-10 s`,
+  translate again `10-14 s`, then stop.
+
+The turn phase enforces at least `0.35 rad/s` absolute yaw command while keeping
+the existing command limits and ramp rates. This changes temporal coverage, not
+the command envelope.
+
+## Fixed Evaluation Suite
+
+`scripts/reinforcement_learning/rsl_rl/config/rnd_step_actuator_imu_eval_v1.json`
+defines separate validation and held-out test domains. Every domain fixes and
+reads back material, mass, COM, actuator state, per-joint encoder offset/age,
+and CMP10A parameters. Legacy velocity kicks and external-wrench events are
+disabled so the only disturbance in a pulse case is the declared force pulse.
+The pulse is applied at the base COM for exactly 24 physics ticks (`0.12 s`) as
+`F = total_mass * requested_delta_velocity / 0.12`, so changing robot mass does
+not silently change the intended velocity impulse. Delivery ticks are recorded
+per environment. If an episode resets before all 24 ticks are delivered, that
+episode is marked as partial delivery and push recovery is right-censored rather
+than reported as a recovery success or failure.
+
+Evaluation reports reward-independent survival/fall, yaw-frame linear speed
+RMSE, yaw-rate RMSE, gait timing and touchdown symmetry, foot progress/taps,
+torque-saturation dwell, and push-recovery time. Episodes are weighted equally
+inside a case and cases are weighted equally in the split summary.
+
+Run validation on a newly trained 171-value checkpoint with:
+
+```bash
+python scripts/reinforcement_learning/rsl_rl/evaluate.py \
+  --task=RNDLab-Isaac-Velocity-Flat-RND-Step-Actuator-IMU-v0 \
+  --suite=scripts/reinforcement_learning/rsl_rl/config/rnd_step_actuator_imu_eval_v1.json \
+  --split=validation --checkpoint=/path/to/model.pt \
+  --num_envs=64 --output=logs/rsl_rl/rnd_step/evaluation/validation --headless
+```
+
+The checked-in test split is intentionally locked until a new 171-value
+checkpoint is selected and its path and SHA-256 are frozen in the suite. This
+prevents using the held-out cases while choosing a checkpoint. Evaluation also
+checks the checkpoint actor input dimension before constructing the runner or
+environment, so an older 45-value checkpoint fails immediately.
+
 ## Stable Walking Rewards
 
 The flat task rewards and penalties are biased toward:
@@ -137,6 +229,7 @@ The flat task rewards and penalties are biased toward:
 - sufficient lateral foot spacing;
 - a fore-aft foot-link center aligned with the default-pose FK target;
 - a low gait-cycle average of the signed right/left fore-aft foot separation;
+- a minimum command-direction foot pass at each ordered right/left touchdown;
 - reduced foot collision risk;
 - reduced foot sliding;
 - left/right gait timing balance;
@@ -147,6 +240,10 @@ fast but unstable gait. The actuator task additionally strengthens straight-foot
 heading and hip-yaw neutrality. Its runner defaults to 6,500 iterations so a
 long CLI override does not remain the normal configuration after late-policy
 regression was observed in a 10,000-iteration run.
+
+The command sampler reserves explicit zero-yaw translation environments so the
+spatial foot-pass and fore-aft balance terms receive enough straight-walking
+training samples without narrowing the full yaw-command range.
 
 ## Play-Time Checks
 

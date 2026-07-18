@@ -48,6 +48,17 @@ def apply_step_flat_stable_walk_rewards(env_cfg) -> None:
             "asset_cfg": SceneEntityCfg("robot"),
         },
     )
+    env_cfg.rewards.persistent_planar_tilt_bias_l2 = RewTerm(
+        func=mdp.PersistentPlanarTiltBiasL2,
+        weight=-15.0,
+        params={
+            "command_name": "base_velocity",
+            "time_constant": 1.5,
+            "yaw_threshold": 0.15,
+            "command_threshold": 0.1,
+            "asset_cfg": SceneEntityCfg("robot"),
+        },
+    )
     env_cfg.rewards.base_height_l2.weight = -4.5
     env_cfg.rewards.base_height_l2.params["target_height"] = STEP_BASE_HEIGHT_TARGET
 
@@ -126,7 +137,7 @@ def apply_step_flat_stable_walk_rewards(env_cfg) -> None:
 
     # Reward completed swing phases instead of every single-support frame.  The previous dense
     # reward combined with the phase terms made a hard contact swap every 0.4 s locally optimal.
-    env_cfg.rewards.feet_air_time.weight = 1.0
+    env_cfg.rewards.feet_air_time.weight = 3.0
     env_cfg.rewards.feet_air_time.func = mdp.feet_air_time
     env_cfg.rewards.feet_air_time.params["threshold"] = 0.20
     env_cfg.rewards.feet_air_time.params["max_time"] = 0.50
@@ -160,6 +171,50 @@ def apply_step_flat_stable_walk_rewards(env_cfg) -> None:
             "command_threshold": 0.1,
             "max_time": 0.40,
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=["R_Leg_foot", "L_Leg_foot"]),
+        },
+    )
+    env_cfg.rewards.biped_touchdown_progress_l2 = RewTerm(
+        func=mdp.biped_touchdown_progress_l2_straight_yaw_command,
+        weight=-3.0,
+        params={
+            "command_name": "base_velocity",
+            "min_progress": 0.04,
+            "min_air_time": 0.06,
+            "yaw_threshold": 0.15,
+            "yaw_scale": 0.75,
+            "command_threshold": 0.1,
+            "sensor_cfg": SceneEntityCfg(
+                "contact_forces",
+                body_names=["R_Leg_foot", "L_Leg_foot"],
+                preserve_order=True,
+            ),
+            "asset_cfg": SceneEntityCfg(
+                "robot",
+                body_names=["R_Leg_foot", "L_Leg_foot"],
+                preserve_order=True,
+            ),
+        },
+    )
+    env_cfg.rewards.biped_touchdown_progress_balance_l2 = RewTerm(
+        func=mdp.BipedTouchdownProgressBalanceL2,
+        weight=-0.25,
+        params={
+            "command_name": "base_velocity",
+            "min_air_time": 0.15,
+            "ema_alpha": 0.25,
+            "progress_scale": 0.04,
+            "yaw_threshold": 0.15,
+            "command_threshold": 0.1,
+            "sensor_cfg": SceneEntityCfg(
+                "contact_forces",
+                body_names=["R_Leg_foot", "L_Leg_foot"],
+                preserve_order=True,
+            ),
+            "asset_cfg": SceneEntityCfg(
+                "robot",
+                body_names=["R_Leg_foot", "L_Leg_foot"],
+                preserve_order=True,
+            ),
         },
     )
     env_cfg.rewards.feet_flight_penalty.weight = -0.5
@@ -260,7 +315,7 @@ def apply_step_flat_stable_walk_rewards(env_cfg) -> None:
     )
     env_cfg.rewards.feet_fore_aft_balance_l2 = RewTerm(
         func=mdp.BipedFeetForeAftBalanceL2,
-        weight=-0.5,
+        weight=-2.0,
         params={
             "command_name": "base_velocity",
             "stance_length": 0.18,
@@ -291,6 +346,14 @@ def apply_step_flat_commands(env_cfg) -> None:
     env_cfg.commands.base_velocity.zero_velocity_threshold = 0.05
     env_cfg.commands.base_velocity.rel_standing_envs = 0.25
     env_cfg.commands.base_velocity.rel_pure_yaw_envs = 0.25
+    env_cfg.commands.base_velocity.rel_straight_envs = 0.35
+    # Preserve most of the original i.i.d. command distribution while dedicating a bounded
+    # subset to realistic start/stop and straight/turn transitions. All targets remain inside
+    # the same configured velocity ranges and pass through the existing rate limiter.
+    env_cfg.commands.base_velocity.transition_sequence_probabilities = (0.15, 0.15)
+    env_cfg.commands.base_velocity.stand_start_stop_times_s = (2.0, 8.0)
+    env_cfg.commands.base_velocity.straight_turn_times_s = (2.0, 6.0, 10.0, 14.0)
+    env_cfg.commands.base_velocity.transition_min_abs_yaw = 0.35
     env_cfg.commands.base_velocity.rel_heading_envs = 0.4
     env_cfg.commands.base_velocity.heading_command = True
     env_cfg.commands.base_velocity.command_ramp_rates = (0.4, 0.8, 1.2)

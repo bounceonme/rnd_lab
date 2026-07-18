@@ -93,6 +93,15 @@ def _compile_isolated_function(tree: ast.Module, name: str):
     return namespace[name]
 
 
+def _compile_isolated_commands_function(tree: ast.Module, name: str):
+    function = _find_function(tree, name)
+    module = ast.Module(body=[function], type_ignores=[])
+    ast.fix_missing_locations(module)
+    namespace = {"torch": torch}
+    exec(compile(module, COMMANDS_PATH, "exec"), namespace)
+    return namespace[name]
+
+
 class RndStepTurnTrainingConfigTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -140,17 +149,77 @@ class RndStepTurnTrainingConfigTest(unittest.TestCase):
             if isinstance(node, ast.ClassDef) and node.name == "UniformThresholdVelocityCommandCfg"
         )
         self.assertEqual(_find_literal_assignment(command_cfg, "rel_pure_yaw_envs"), 0.0)
+        self.assertEqual(_find_literal_assignment(command_cfg, "rel_straight_envs"), 0.0)
 
     def test_rnd_flat_enables_turn_training_without_reducing_yaw_range(self):
         configure = _find_function(self.behavior_tree, "apply_step_flat_commands")
         self.assertEqual(_find_literal_assignment(configure, "env_cfg.commands.base_velocity.rel_standing_envs"), 0.25)
         self.assertEqual(_find_literal_assignment(configure, "env_cfg.commands.base_velocity.rel_pure_yaw_envs"), 0.25)
+        self.assertEqual(_find_literal_assignment(configure, "env_cfg.commands.base_velocity.rel_straight_envs"), 0.35)
         self.assertEqual(
             _find_literal_assignment(configure, "env_cfg.commands.base_velocity.ranges.ang_vel_z"), (-1.0, 1.0)
         )
         self.assertEqual(
             _find_literal_assignment(configure, "env_cfg.commands.base_velocity.command_ramp_rates"),
             (0.4, 0.8, 1.2),
+        )
+        self.assertEqual(
+            _find_literal_assignment(
+                configure,
+                "env_cfg.commands.base_velocity.transition_sequence_probabilities",
+            ),
+            (0.15, 0.15),
+        )
+
+    def test_action_excess_penalty_leaves_nominal_actions_unconstrained(self):
+        penalty_fn = _compile_isolated_function(self.rewards_tree, "_action_excess_l2")
+        actions = torch.tensor(
+            [
+                [-1.5, 0.0, 1.5],
+                [-2.0, 1.0, 3.0],
+            ]
+        )
+
+        penalty = penalty_fn(actions, 1.5)
+
+        torch.testing.assert_close(penalty, torch.tensor([0.0, 2.5]))
+        with self.assertRaisesRegex(ValueError, "non-negative"):
+            penalty_fn(actions, -0.1)
+
+    def test_transition_sequence_targets_follow_the_configured_phase_order(self):
+        resolve = _compile_isolated_commands_function(
+            self.commands_tree,
+            "_resolve_transition_sequence_targets",
+        )
+        mode = torch.tensor([1, 1, 1, 2, 2, 2, 2, 2, 0])
+        time_s = torch.tensor([1.0, 3.0, 9.0, 1.0, 3.0, 7.0, 11.0, 15.0, 7.0])
+        forward_y = torch.full((9,), -0.4)
+        turn_yaw = torch.full((9,), 0.6)
+
+        target = resolve(
+            mode,
+            time_s,
+            forward_y,
+            turn_yaw,
+            (2.0, 8.0),
+            (2.0, 6.0, 10.0, 14.0),
+        )
+
+        torch.testing.assert_close(
+            target,
+            torch.tensor(
+                [
+                    [0.0, 0.0, 0.0],
+                    [0.0, -0.4, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, -0.4, 0.0],
+                    [0.0, -0.4, 0.6],
+                    [0.0, -0.4, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                ]
+            ),
         )
 
     def test_rnd_flat_uses_tighter_velocity_tracking_rewards(self):
@@ -169,7 +238,7 @@ class RndStepTurnTrainingConfigTest(unittest.TestCase):
 
     def test_contact_shaping_does_not_force_hard_single_support_swaps(self):
         configure = _find_function(self.behavior_tree, "apply_step_flat_stable_walk_rewards")
-        self.assertEqual(_find_literal_assignment(configure, "env_cfg.rewards.feet_air_time.weight"), 1.0)
+        self.assertEqual(_find_literal_assignment(configure, "env_cfg.rewards.feet_air_time.weight"), 3.0)
         self.assertEqual(
             _find_call_keyword(configure, "env_cfg.rewards.biped_gait_phase_l2", "weight"),
             -1.5,
@@ -227,7 +296,7 @@ class RndStepTurnTrainingConfigTest(unittest.TestCase):
         configure = _find_function(self.behavior_tree, "apply_step_flat_stable_walk_rewards")
         self.assertEqual(
             _find_call_keyword(configure, "env_cfg.rewards.feet_fore_aft_balance_l2", "weight"),
-            -0.5,
+            -2.0,
         )
         self.assertEqual(
             _find_call_dict_value(
@@ -256,6 +325,163 @@ class RndStepTurnTrainingConfigTest(unittest.TestCase):
         self.assertIsNotNone(configure_source)
         self.assertIn('body_names=["R_Leg_foot", "L_Leg_foot"]', configure_source)
         self.assertIn("preserve_order=True", configure_source)
+
+    def test_touchdown_progress_penalizes_the_short_side_without_forcing_simultaneous_contacts(self):
+        penalty_fn = _compile_isolated_function(self.rewards_tree, "_biped_touchdown_progress_l2")
+        landing_progress = torch.tensor(
+            [
+                [0.02, -0.02],
+                [-0.08, 0.08],
+                [0.00, 0.00],
+                [0.02, -0.02],
+            ]
+        )
+        first_contact = torch.tensor(
+            [
+                [True, False],
+                [False, True],
+                [True, True],
+                [True, False],
+            ]
+        )
+        last_air_time = torch.tensor(
+            [
+                [0.10, 0.00],
+                [0.00, 0.10],
+                [0.10, 0.10],
+                [0.04, 0.00],
+            ]
+        )
+
+        penalty = penalty_fn(landing_progress, first_contact, last_air_time, 0.04, 0.06)
+
+        torch.testing.assert_close(penalty, torch.tensor([0.25, 0.0, 0.0, 0.0]))
+
+    def test_touchdown_progress_uses_command_direction_and_ordered_feet(self):
+        configure = _find_function(self.behavior_tree, "apply_step_flat_stable_walk_rewards")
+        self.assertEqual(
+            _find_call_keyword(configure, "env_cfg.rewards.biped_touchdown_progress_l2", "weight"),
+            -3.0,
+        )
+        self.assertEqual(
+            _find_call_dict_value(
+                configure,
+                "env_cfg.rewards.biped_touchdown_progress_l2",
+                "params",
+                "min_progress",
+            ),
+            0.04,
+        )
+        function = _find_function(self.rewards_tree, "biped_touchdown_progress_l2_straight_yaw_command")
+        source = ast.get_source_segment(self.rewards_source, function)
+        self.assertIsNotNone(source)
+        self.assertIn("command_direction", source)
+        self.assertIn("compute_first_contact", source)
+        self.assertIn("single_touchdown", self.rewards_source)
+
+        configure_source = ast.get_source_segment(
+            FLAT_BEHAVIOR_PATH.read_text(encoding="utf-8"),
+            configure,
+        )
+        self.assertIsNotNone(configure_source)
+        self.assertIn('body_names=["R_Leg_foot", "L_Leg_foot"]', configure_source)
+        self.assertIn("preserve_order=True", configure_source)
+
+    def test_touchdown_progress_balance_tracks_each_foot_without_constraining_turns(self):
+        update_fn = _compile_isolated_function(
+            self.rewards_tree,
+            "_update_biped_touchdown_progress_balance",
+        )
+        progress_ema = torch.zeros(3, 2)
+        initialized = torch.zeros(3, 2, dtype=torch.bool)
+        active = torch.tensor([True, True, False])
+        landing_progress = torch.tensor([[0.08, 0.02], [0.05, 0.05], [0.08, 0.02]])
+
+        first = update_fn(
+            progress_ema,
+            initialized,
+            landing_progress,
+            torch.tensor([[True, False], [True, False], [True, False]]),
+            active,
+            0.25,
+            0.04,
+        )
+        torch.testing.assert_close(first, torch.zeros(3))
+        second = update_fn(
+            progress_ema,
+            initialized,
+            landing_progress,
+            torch.tensor([[False, True], [False, True], [False, True]]),
+            active,
+            0.25,
+            0.04,
+        )
+
+        torch.testing.assert_close(second, torch.tensor([1.0, 0.0, 0.0]))
+        self.assertFalse(bool(initialized[2].any()))
+        torch.testing.assert_close(progress_ema[2], torch.zeros(2))
+
+        configure = _find_function(self.behavior_tree, "apply_step_flat_stable_walk_rewards")
+        self.assertEqual(
+            _find_call_keyword(configure, "env_cfg.rewards.biped_touchdown_progress_balance_l2", "weight"),
+            -0.25,
+        )
+        self.assertEqual(
+            _find_call_dict_value(
+                configure,
+                "env_cfg.rewards.biped_touchdown_progress_balance_l2",
+                "params",
+                "yaw_threshold",
+            ),
+            0.15,
+        )
+        self.assertEqual(
+            _find_call_dict_value(
+                configure,
+                "env_cfg.rewards.biped_touchdown_progress_balance_l2",
+                "params",
+                "min_air_time",
+            ),
+            0.15,
+        )
+
+    def test_persistent_planar_tilt_filters_sway_and_prevents_axis_exchange(self):
+        update_fn = _compile_isolated_function(self.rewards_tree, "_update_planar_tilt_bias_ema")
+        ema = torch.zeros(3, 2)
+        active = torch.ones(3, dtype=torch.bool)
+        for step in range(60):
+            planar_tilt = torch.tensor([
+                [0.05, 0.0],
+                [0.0, 0.05],
+                [0.05 if step % 2 == 0 else -0.05, 0.05 if step % 2 == 0 else -0.05],
+            ])
+            penalty = update_fn(ema, planar_tilt, active, 0.1)
+
+        torch.testing.assert_close(penalty[0], penalty[1])
+        self.assertGreater(float(penalty[0]), 100.0 * float(penalty[2]))
+        reset_penalty = update_fn(
+            ema,
+            torch.full((3, 2), 0.05),
+            torch.zeros(3, dtype=torch.bool),
+            0.1,
+        )
+        torch.testing.assert_close(reset_penalty, torch.zeros(3))
+        torch.testing.assert_close(ema, torch.zeros(3, 2))
+
+        configure = _find_function(self.behavior_tree, "apply_step_flat_stable_walk_rewards")
+        self.assertEqual(
+            _find_call_keyword(configure, "env_cfg.rewards.persistent_planar_tilt_bias_l2", "weight"),
+            -15.0,
+        )
+        self.assertEqual(
+            _find_call_dict_value(
+                configure,
+                "env_cfg.rewards.persistent_planar_tilt_bias_l2",
+                "params",
+                "time_constant",
+            ),
+            1.5,
+        )
 
     def test_underspeed_penalty_uses_command_direction_in_yaw_frame(self):
         function = _find_function(self.rewards_tree, "lin_vel_xy_underspeed_l2")
@@ -387,6 +613,9 @@ class RndStepTurnTrainingConfigTest(unittest.TestCase):
         self.assertEqual(
             _find_call_keyword(configure, "env_cfg.rewards.lateral_tilt_x_with_cmd_l2", "weight"), -10.0
         )
+        self.assertEqual(
+            _find_call_keyword(configure, "env_cfg.rewards.persistent_planar_tilt_bias_l2", "weight"), -15.0
+        )
 
         source = ast.get_source_segment(FLAT_BEHAVIOR_PATH.read_text(encoding="utf-8"), configure)
         self.assertIsNotNone(source)
@@ -416,7 +645,27 @@ class RndStepTurnTrainingConfigTest(unittest.TestCase):
         self.assertIsNotNone(source)
         self.assertIn("~self.is_standing_env[env_ids]", source)
         self.assertIn("~self.is_pure_yaw_env[env_ids]", source)
-        self.assertNotIn("self.vel_command_target_b[env_ids, 2] *=", source)
+        self.assertNotIn(
+            "self.vel_command_target_b[env_ids, 2] *= ~self.is_pure_yaw_env[env_ids]",
+            source,
+        )
+
+    def test_straight_sampler_keeps_translation_and_disables_heading_yaw(self):
+        command_class = next(
+            node
+            for node in self.commands_tree.body
+            if isinstance(node, ast.ClassDef) and node.name == "UniformThresholdVelocityCommand"
+        )
+        sampler = next(
+            node
+            for node in command_class.body
+            if isinstance(node, ast.FunctionDef) and node.name == "_sample_command_target"
+        )
+        source = ast.get_source_segment(self.commands_source, sampler)
+        self.assertIsNotNone(source)
+        self.assertIn("~self.is_pure_yaw_env[env_ids]", source)
+        self.assertIn("self.vel_command_target_b[env_ids, 2] *= ~self.is_straight_env[env_ids]", source)
+        self.assertIn("self.is_heading_env[env_ids] &= ~self.is_straight_env[env_ids]", source)
 
     def test_flight_penalty_gates_on_linear_and_angular_commands(self):
         function = _find_function(self.rewards_tree, "feet_flight_penalty")

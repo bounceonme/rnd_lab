@@ -235,7 +235,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     # Environment randomization events stay enabled. Sensor corruption is opt-in so
     # nominal playback remains deterministic while still supporting sim-to-real checks.
     env_cfg.observations.policy.enable_corruption = args_cli.enable_observation_corruption
-    for term_name in ("base_ang_vel", "projected_gravity"):
+    for term_name in ("base_ang_vel", "projected_gravity", "joint_pos"):
         term_cfg = getattr(env_cfg.observations.policy, term_name, None)
         term_params = getattr(term_cfg, "params", None)
         if isinstance(term_params, dict) and "sample_randomization" in term_params:

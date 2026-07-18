@@ -14,9 +14,9 @@ def apply_step_flat_domain_randomization(env_cfg) -> None:
     env_cfg.events.randomize_rigid_body_material.params["restitution_range"] = (0.0, 0.15)
     env_cfg.events.randomize_rigid_body_material.params["make_consistent"] = True
 
-    # The URDF totals 5.33629 kg while the assembled robot measured 5.646 kg. Treat the
-    # 0.30971 kg difference as uncertain upper-body payload merged into base_link.
-    measured_mass_offset = 5.646 - 5.33629
+    # The IMU-equipped URDF totals 5.3407113 kg while the assembled robot measured
+    # 5.646 kg. Treat the remaining difference as uncertain upper-body payload merged into base_link.
+    measured_mass_offset = 5.646 - 5.3407113
     env_cfg.events.randomize_rigid_body_mass_base.params["mass_distribution_params"] = (
         measured_mass_offset - 0.11,
         measured_mass_offset + 0.11,

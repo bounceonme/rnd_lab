@@ -35,11 +35,31 @@ def _load_module_without_isaac_app():
 
     isaaclab_stub = types.ModuleType("isaaclab")
     managers_stub = types.ModuleType("isaaclab.managers")
+    utils_stub = types.ModuleType("isaaclab.utils")
+    math_stub = types.ModuleType("isaaclab.utils.math")
+
+    def quat_apply(quat, vector):
+        xyz = quat[..., 1:]
+        intermediate = 2.0 * torch.cross(xyz, vector, dim=-1)
+        return vector + quat[..., :1] * intermediate + torch.cross(xyz, intermediate, dim=-1)
+
+    def quat_apply_inverse(quat, vector):
+        inverse = quat.clone()
+        inverse[..., 1:] *= -1.0
+        return quat_apply(inverse, vector)
+
     managers_stub.ManagerTermBase = ManagerTermBase
+    math_stub.quat_apply = quat_apply
+    math_stub.quat_apply_inverse = quat_apply_inverse
+    utils_stub.math = math_stub
     isaaclab_stub.managers = managers_stub
-    saved_modules = {name: sys.modules.get(name) for name in ("isaaclab", "isaaclab.managers")}
+    isaaclab_stub.utils = utils_stub
+    module_names = ("isaaclab", "isaaclab.managers", "isaaclab.utils", "isaaclab.utils.math")
+    saved_modules = {name: sys.modules.get(name) for name in module_names}
     sys.modules["isaaclab"] = isaaclab_stub
     sys.modules["isaaclab.managers"] = managers_stub
+    sys.modules["isaaclab.utils"] = utils_stub
+    sys.modules["isaaclab.utils.math"] = math_stub
     try:
         module_name = "_test_rnd_imu_observations"
         spec = importlib.util.spec_from_file_location(module_name, MODULE_PATH)
@@ -68,6 +88,12 @@ def _runtime_model() -> dict:
         "policy_hz": 50.0,
         "policy_angular_velocity_scale": 0.25,
         "policy_observation": {"policy_hz": 50.0, "angular_velocity_scale": 0.25},
+        "sensor_to_base_matrix": [[-1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0]],
+        "runtime_transform": {
+            "source_frame": "sensor",
+            "target_frame": "base_link",
+            "sensor_to_base_matrix": [[-1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0]],
+        },
         "quality_gates": {
             "promotion_pass": True,
             "static_runtime_gate_pass": True,
@@ -213,6 +239,10 @@ class RndImuObservationModelTest(unittest.TestCase):
             self.assertEqual(model.policy_angular_velocity_scale, 0.25)
             self.assertEqual(model.gyro_delay_range_s, (0.0, 0.005))
             self.assertEqual(model.gravity_delay_range_s, (0.0, 0.020))
+            self.assertEqual(
+                model.sensor_to_base_matrix,
+                ((-1.0, 0.0, 0.0), (0.0, -1.0, 0.0), (0.0, 0.0, 1.0)),
+            )
 
             invalid = _runtime_model()
             invalid["assumed_simulation_envelopes"]["gyro_sample_age_delay"]["range_s"][1] = 0.006
@@ -237,26 +267,38 @@ class RndImuObservationModelTest(unittest.TestCase):
             path = Path(directory) / "cmp10a.json"
             path.write_text(json.dumps(_runtime_model()), encoding="utf-8")
             data = SimpleNamespace(
-                root_ang_vel_b=torch.zeros((1, 3)),
-                projected_gravity_b=torch.tensor([[0.0, 0.0, -1.0]]),
+                root_link_quat_w=torch.tensor([[1.0, 0.0, 0.0, 0.0]]),
+                body_quat_w=torch.tensor([[[1.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]]]),
+                body_ang_vel_w=torch.zeros((1, 2, 3)),
+                GRAVITY_VEC_W=torch.tensor([[0.0, 0.0, -1.0]]),
+            )
+            asset = SimpleNamespace(data=data, body_names=["Upper_Body", "imu"])
+            asset.find_bodies = lambda body_name, preserve_order=False: (
+                ([1], ["imu"]) if body_name == "imu" else ([], [])
             )
             env = SimpleNamespace(
                 num_envs=1,
                 device="cpu",
                 step_dt=0.02,
                 common_step_counter=0,
-                scene={"robot": SimpleNamespace(data=data)},
+                scene={"robot": asset},
             )
-            params = {"channel": "gyro", "model_path": str(path), "sample_randomization": False}
+            params = {
+                "channel": "gyro",
+                "model_path": str(path),
+                "sample_randomization": False,
+                "body_name": "imu",
+            }
             term = imu.RndCmp10aObservation(SimpleNamespace(params=params, scale=0.25), env)
             term(env, **params)
-            data.root_ang_vel_b.fill_(8.0)
-            data.projected_gravity_b.fill_(99.0)
+            data.body_ang_vel_w[:, 1].fill_(8.0)
             env.common_step_counter = 1
 
             result = term(env, **params)
 
             torch.testing.assert_close(result, torch.full((1, 3), 7.0))
+            self.assertEqual(term.body_name, "imu")
+            self.assertEqual(term.body_id, 1)
 
             env.step_dt = 0.01
             with self.assertRaisesRegex(ValueError, "1/env.step_dt=100.0"):

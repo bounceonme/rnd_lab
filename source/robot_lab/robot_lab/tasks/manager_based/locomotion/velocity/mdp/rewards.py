@@ -22,6 +22,19 @@ if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedRLEnv
 
 
+def _action_excess_l2(actions: torch.Tensor, threshold: float) -> torch.Tensor:
+    """Return a hinge penalty for raw actions outside the nominal policy range."""
+    if threshold < 0.0:
+        raise ValueError("threshold must be non-negative.")
+    excess = torch.clamp(torch.abs(actions) - threshold, min=0.0)
+    return torch.sum(torch.square(excess), dim=1)
+
+
+def action_excess_l2(env: ManagerBasedRLEnv, threshold: float) -> torch.Tensor:
+    """Penalize only excessive raw actions while leaving ordinary gait actions untouched."""
+    return _action_excess_l2(env.action_manager.action, threshold)
+
+
 def track_lin_vel_xy_exp(
     env: ManagerBasedRLEnv, std: float, command_name: str, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
 ) -> torch.Tensor:
@@ -542,6 +555,175 @@ def feet_air_time_positive_biped(env, command_name: str, threshold: float, senso
     reward *= torch.norm(env.command_manager.get_command(command_name), dim=1) > 0.1
     reward *= torch.clamp(-env.scene["robot"].data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
     return reward
+
+
+def _biped_touchdown_progress_l2(
+    landing_progress: torch.Tensor,
+    first_contact: torch.Tensor,
+    last_air_time: torch.Tensor,
+    min_progress: float,
+    min_air_time: float,
+) -> torch.Tensor:
+    """Penalize a landing foot that has not passed the stance foot far enough."""
+    single_touchdown = torch.sum(first_contact.int(), dim=1) == 1
+    valid_touchdown = torch.logical_and(first_contact, last_air_time >= min_air_time)
+    valid_touchdown &= single_touchdown.unsqueeze(1)
+    normalized_deficit = torch.clamp((min_progress - landing_progress) / min_progress, min=0.0)
+    return torch.sum(torch.square(normalized_deficit) * valid_touchdown, dim=1)
+
+
+def biped_touchdown_progress_l2_straight_yaw_command(
+    env: ManagerBasedRLEnv,
+    command_name: str,
+    min_progress: float,
+    min_air_time: float,
+    yaw_threshold: float,
+    yaw_scale: float,
+    command_threshold: float,
+    sensor_cfg: SceneEntityCfg,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """Require each landing foot to pass the stance foot along the commanded direction.
+
+    Timing-only gait rewards accept a policy that alternates contacts while one side takes a
+    much larger step. This term checks spatial progress at touchdown and is symmetric in the
+    explicitly ordered right/left feet.
+    """
+    if min_progress <= 0.0:
+        raise ValueError("min_progress must be positive.")
+    if min_air_time < 0.0:
+        raise ValueError("min_air_time must be non-negative.")
+
+    asset: RigidObject = env.scene[asset_cfg.name]
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    if len(asset_cfg.body_ids) != 2 or len(sensor_cfg.body_ids) != 2:
+        raise ValueError("biped_touchdown_progress_l2 expects exactly two ordered feet.")
+
+    foot_pos_w = asset.data.body_link_pos_w[:, asset_cfg.body_ids] - asset.data.root_link_pos_w.unsqueeze(1)
+    foot_pos_yaw = quat_apply_inverse(
+        yaw_quat(asset.data.root_link_quat_w).unsqueeze(1).expand(-1, 2, -1),
+        foot_pos_w,
+    )
+    command = env.command_manager.get_command(command_name)
+    command_xy = command[:, :2]
+    command_speed = torch.linalg.vector_norm(command_xy, dim=1)
+    command_direction = command_xy / command_speed.unsqueeze(1).clamp_min(command_threshold)
+    right_minus_left = torch.sum((foot_pos_yaw[:, 0, :2] - foot_pos_yaw[:, 1, :2]) * command_direction, dim=1)
+    landing_progress = torch.stack((right_minus_left, -right_minus_left), dim=1)
+
+    first_contact = contact_sensor.compute_first_contact(env.step_dt)[:, sensor_cfg.body_ids]
+    last_air_time = contact_sensor.data.last_air_time[:, sensor_cfg.body_ids]
+    reward = _biped_touchdown_progress_l2(
+        landing_progress,
+        first_contact,
+        last_air_time,
+        min_progress,
+        min_air_time,
+    )
+    reward *= command_speed > command_threshold
+    reward *= _straight_yaw_command_gate(env, command_name, yaw_threshold, yaw_scale)
+    reward *= torch.clamp(-asset.data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+    return reward
+
+
+def _update_biped_touchdown_progress_balance(
+    progress_ema: torch.Tensor,
+    initialized: torch.Tensor,
+    landing_progress: torch.Tensor,
+    valid_touchdown: torch.Tensor,
+    active: torch.Tensor,
+    ema_alpha: float,
+    progress_scale: float,
+) -> torch.Tensor:
+    """Update per-foot touchdown progress and return a bounded left/right imbalance cost."""
+    progress_ema[~active] = 0.0
+    initialized[~active] = False
+    update = valid_touchdown & active.unsqueeze(1)
+    first_update = update & ~initialized
+    continuing_update = update & initialized
+    progress_ema[first_update] = landing_progress[first_update]
+    progress_ema[continuing_update] += ema_alpha * (
+        landing_progress[continuing_update] - progress_ema[continuing_update]
+    )
+    initialized[update] = True
+    comparable = active & torch.all(initialized, dim=1)
+    normalized_difference = torch.clamp(
+        (progress_ema[:, 0] - progress_ema[:, 1]) / progress_scale,
+        min=-1.0,
+        max=1.0,
+    )
+    return torch.square(normalized_difference) * comparable.float()
+
+
+class BipedTouchdownProgressBalanceL2(ManagerTermBase):
+    """Penalize persistent right/left step-length mismatch during straight translation."""
+
+    def __init__(self, cfg: RewTerm, env: ManagerBasedRLEnv):
+        super().__init__(cfg, env)
+        asset_cfg: SceneEntityCfg = cfg.params["asset_cfg"]
+        sensor_cfg: SceneEntityCfg = cfg.params["sensor_cfg"]
+        if len(asset_cfg.body_ids) != 2 or len(sensor_cfg.body_ids) != 2:
+            raise ValueError("BipedTouchdownProgressBalanceL2 expects exactly two ordered feet.")
+        if cfg.params["min_air_time"] < 0.0:
+            raise ValueError("min_air_time must be non-negative.")
+        if not 0.0 < cfg.params["ema_alpha"] <= 1.0:
+            raise ValueError("ema_alpha must lie in (0, 1].")
+        if cfg.params["progress_scale"] <= 0.0:
+            raise ValueError("progress_scale must be positive.")
+        self._progress_ema = torch.zeros(env.num_envs, 2, device=env.device)
+        self._progress_initialized = torch.zeros(env.num_envs, 2, dtype=torch.bool, device=env.device)
+
+    def reset(self, env_ids: Sequence[int] | torch.Tensor | slice | None = None) -> None:
+        if env_ids is None:
+            env_ids = slice(None)
+        self._progress_ema[env_ids] = 0.0
+        self._progress_initialized[env_ids] = False
+
+    def __call__(
+        self,
+        env: ManagerBasedRLEnv,
+        command_name: str,
+        min_air_time: float,
+        ema_alpha: float,
+        progress_scale: float,
+        yaw_threshold: float,
+        command_threshold: float,
+        sensor_cfg: SceneEntityCfg,
+        asset_cfg: SceneEntityCfg,
+    ) -> torch.Tensor:
+        asset: RigidObject = env.scene[asset_cfg.name]
+        contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+        foot_pos_w = asset.data.body_link_pos_w[:, asset_cfg.body_ids] - asset.data.root_link_pos_w.unsqueeze(1)
+        foot_pos_yaw = quat_apply_inverse(
+            yaw_quat(asset.data.root_link_quat_w).unsqueeze(1).expand(-1, 2, -1),
+            foot_pos_w,
+        )
+        command = env.command_manager.get_command(command_name)
+        command_xy = command[:, :2]
+        command_speed = torch.linalg.vector_norm(command_xy, dim=1)
+        command_direction = command_xy / command_speed.unsqueeze(1).clamp_min(command_threshold)
+        right_minus_left = torch.sum(
+            (foot_pos_yaw[:, 0, :2] - foot_pos_yaw[:, 1, :2]) * command_direction,
+            dim=1,
+        )
+        landing_progress = torch.stack((right_minus_left, -right_minus_left), dim=1)
+
+        first_contact = contact_sensor.compute_first_contact(env.step_dt)[:, sensor_cfg.body_ids]
+        single_touchdown = torch.sum(first_contact.int(), dim=1) == 1
+        valid_touchdown = first_contact & (contact_sensor.data.last_air_time[:, sensor_cfg.body_ids] >= min_air_time)
+        valid_touchdown &= single_touchdown.unsqueeze(1)
+        active = (command_speed > command_threshold) & (torch.abs(command[:, 2]) <= yaw_threshold)
+        reward = _update_biped_touchdown_progress_balance(
+            self._progress_ema,
+            self._progress_initialized,
+            landing_progress,
+            valid_touchdown,
+            active,
+            ema_alpha,
+            progress_scale,
+        )
+        reward *= torch.clamp(-asset.data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+        return reward
 
 
 def feet_air_time_variance_penalty(env: ManagerBasedRLEnv, sensor_cfg: SceneEntityCfg) -> torch.Tensor:
@@ -1270,6 +1452,114 @@ def lateral_tilt_x_l2_with_cmd(
     planar_command = env.command_manager.get_command(command_name)[:, :2]
     reward *= torch.linalg.norm(planar_command, dim=1) > command_threshold
     return reward
+
+
+def _update_lateral_tilt_bias_ema(
+    ema: torch.Tensor,
+    lateral_tilt: torch.Tensor,
+    active: torch.Tensor,
+    alpha: float,
+) -> torch.Tensor:
+    """Low-pass lateral tilt so alternating sway cancels while a sustained lean remains."""
+    ema[~active] = 0.0
+    ema[active] += alpha * (lateral_tilt[active] - ema[active])
+    return torch.square(ema)
+
+
+class PersistentLateralTiltBiasL2(ManagerTermBase):
+    """Penalize only the low-frequency lateral lean component during straight walking."""
+
+    def __init__(self, cfg: RewTerm, env: ManagerBasedRLEnv):
+        super().__init__(cfg, env)
+        if cfg.params["time_constant"] <= 0.0:
+            raise ValueError("time_constant must be positive.")
+        self._lateral_tilt_ema = torch.zeros(env.num_envs, device=env.device)
+
+    def reset(self, env_ids: Sequence[int] | torch.Tensor | slice | None = None) -> None:
+        if env_ids is None:
+            env_ids = slice(None)
+        self._lateral_tilt_ema[env_ids] = 0.0
+
+    def __call__(
+        self,
+        env: ManagerBasedRLEnv,
+        command_name: str,
+        time_constant: float,
+        yaw_threshold: float,
+        command_threshold: float,
+        asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+    ) -> torch.Tensor:
+        asset: RigidObject = env.scene[asset_cfg.name]
+        command = env.command_manager.get_command(command_name)
+        active = (torch.linalg.vector_norm(command[:, :2], dim=1) > command_threshold) & (
+            torch.abs(command[:, 2]) <= yaw_threshold
+        )
+        alpha = -math.expm1(-float(env.step_dt) / time_constant)
+        reward = _update_lateral_tilt_bias_ema(
+            self._lateral_tilt_ema,
+            torch.clamp(asset.data.projected_gravity_b[:, 0], min=-0.35, max=0.35),
+            active,
+            alpha,
+        )
+        reward *= active.float()
+        reward *= torch.clamp(-asset.data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+        return reward
+
+
+def _update_planar_tilt_bias_ema(
+    ema: torch.Tensor,
+    planar_tilt: torch.Tensor,
+    active: torch.Tensor,
+    alpha: float,
+) -> torch.Tensor:
+    """Low-pass roll/pitch tilt together so a policy cannot exchange one axis for the other."""
+    ema[~active] = 0.0
+    ema[active] += alpha * (planar_tilt[active] - ema[active])
+    return torch.sum(torch.square(ema), dim=1)
+
+
+class PersistentPlanarTiltBiasL2(ManagerTermBase):
+    """Penalize low-frequency roll and pitch bias during straight translation.
+
+    The temporal filter leaves brief acceleration lean and disturbance recovery largely
+    untouched. The straight-command gate releases the term for deliberate turning.
+    """
+
+    def __init__(self, cfg: RewTerm, env: ManagerBasedRLEnv):
+        super().__init__(cfg, env)
+        if cfg.params["time_constant"] <= 0.0:
+            raise ValueError("time_constant must be positive.")
+        self._planar_tilt_ema = torch.zeros(env.num_envs, 2, device=env.device)
+
+    def reset(self, env_ids: Sequence[int] | torch.Tensor | slice | None = None) -> None:
+        if env_ids is None:
+            env_ids = slice(None)
+        self._planar_tilt_ema[env_ids] = 0.0
+
+    def __call__(
+        self,
+        env: ManagerBasedRLEnv,
+        command_name: str,
+        time_constant: float,
+        yaw_threshold: float,
+        command_threshold: float,
+        asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+    ) -> torch.Tensor:
+        asset: RigidObject = env.scene[asset_cfg.name]
+        command = env.command_manager.get_command(command_name)
+        active = (torch.linalg.vector_norm(command[:, :2], dim=1) > command_threshold) & (
+            torch.abs(command[:, 2]) <= yaw_threshold
+        )
+        alpha = -math.expm1(-float(env.step_dt) / time_constant)
+        reward = _update_planar_tilt_bias_ema(
+            self._planar_tilt_ema,
+            torch.clamp(asset.data.projected_gravity_b[:, :2], min=-0.35, max=0.35),
+            active,
+            alpha,
+        )
+        reward *= active.float()
+        reward *= torch.clamp(-asset.data.projected_gravity_b[:, 2], 0, 0.7) / 0.7
+        return reward
 
 
 def ang_vel_xy_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
